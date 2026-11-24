@@ -30,11 +30,6 @@ class Addon extends GFAddOn {
 	protected $_capabilities_form_settings = 'gravityforms_edit_forms';
 
 	/**
-	 * Admin page that creates a donation form.
-	 */
-	const NEW_FORM_PAGE = 'giftkit_new_form';
-
-	/**
 	 * @var Addon|null
 	 */
 	private static $_instance = null;
@@ -89,7 +84,7 @@ class Addon extends GFAddOn {
 	public function init_admin() {
 		parent::init_admin();
 		add_filter( 'gform_addon_navigation', array( $this, 'add_menu_item' ) );
-		add_action( 'admin_post_' . self::NEW_FORM_PAGE, array( $this, 'handle_new_form' ) );
+		add_action( 'admin_post_' . Admin_Page::SLUG, array( Admin_Page::class, 'handle_create' ) );
 		add_action( 'admin_footer', array( $this, 'print_forms_list_button' ) );
 	}
 
@@ -156,6 +151,13 @@ class Addon extends GFAddOn {
 				'strings'   => $this->script_strings(),
 				'enqueue'   => array( array( $this, 'form_needs_assets' ) ),
 			),
+			array(
+				'handle'    => 'giftkit-admin',
+				'src'       => $this->get_base_url() . '/assets/js/admin.js',
+				'version'   => $this->_version,
+				'in_footer' => true,
+				'enqueue'   => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
+			),
 		);
 
 		return array_merge( parent::scripts(), $scripts );
@@ -171,6 +173,12 @@ class Addon extends GFAddOn {
 				'src'     => $this->get_base_url() . '/assets/css/giftkit.css',
 				'version' => $this->_version,
 				'enqueue' => array( array( $this, 'form_needs_assets' ) ),
+			),
+			array(
+				'handle'  => 'giftkit-admin',
+				'src'     => $this->get_base_url() . '/assets/css/admin.css',
+				'version' => $this->_version,
+				'enqueue' => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
 			),
 		);
 
@@ -211,22 +219,13 @@ class Addon extends GFAddOn {
 	 */
 	public function add_menu_item( $menus ) {
 		$menus[] = array(
-			'name'       => self::NEW_FORM_PAGE,
+			'name'       => Admin_Page::SLUG,
 			'label'      => __( 'New Donation Form', 'giftkit' ),
-			'callback'   => array( $this, 'render_new_form_page' ),
+			'callback'   => array( Admin_Page::class, 'render' ),
 			'permission' => 'gravityforms_create_form',
 		);
 
 		return $menus;
-	}
-
-	/**
-	 * URL of the "New Donation Form" page.
-	 *
-	 * @return string
-	 */
-	public static function new_form_url() {
-		return admin_url( 'admin.php?page=' . self::NEW_FORM_PAGE );
 	}
 
 	/**
@@ -252,73 +251,11 @@ class Addon extends GFAddOn {
 				link.textContent = %s;
 				addNew.insertAdjacentElement( "afterend", link );
 			})();',
-			wp_json_encode( self::new_form_url() ),
+			wp_json_encode( Admin_Page::url() ),
 			wp_json_encode( __( 'New Donation Form', 'giftkit' ) )
 		);
 
 		wp_print_inline_script_tag( $script );
-	}
-
-	/**
-	 * The "New Donation Form" page.
-	 */
-	public function render_new_form_page() {
-		$stripe_ready = $this->stripe_is_connected();
-		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'New Donation Form', 'giftkit' ); ?></h1>
-			<p><?php esc_html_e( 'GiftKit creates a three-page donation form (gift amount, donor details, payment) with its Stripe feeds already set up. Afterwards, the form\'s Donation settings tab holds everything you\'re likely to change.', 'giftkit' ); ?></p>
-			<?php if ( ! $stripe_ready ) : ?>
-				<div class="notice notice-warning inline"><p>
-					<?php
-					printf(
-						/* translators: %s: link to the Stripe settings */
-						esc_html__( 'Stripe isn\'t connected yet. You can create the form now, but it can\'t take payments until you connect Stripe under %s.', 'giftkit' ),
-						'<a href="' . esc_url( admin_url( 'admin.php?page=gf_settings&subview=gravityformsstripe' ) ) . '">' . esc_html__( 'Forms → Settings → Stripe', 'giftkit' ) . '</a>'
-					);
-					?>
-				</p></div>
-			<?php endif; ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( self::NEW_FORM_PAGE ); ?>">
-				<?php wp_nonce_field( self::NEW_FORM_PAGE ); ?>
-				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row"><label for="giftkit-title"><?php esc_html_e( 'Form title', 'giftkit' ); ?></label></th>
-						<td><input type="text" class="regular-text" id="giftkit-title" name="giftkit_title" value="<?php esc_attr_e( 'Donate', 'giftkit' ); ?>" required></td>
-					</tr>
-				</table>
-				<?php submit_button( __( 'Create Donation Form', 'giftkit' ) ); ?>
-			</form>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Creates the form, then opens its Donation settings tab.
-	 */
-	public function handle_new_form() {
-		if ( ! GFCommon::current_user_can_any( 'gravityforms_create_form' ) ) {
-			wp_die( esc_html__( 'You are not allowed to create forms.', 'giftkit' ), 403 );
-		}
-		check_admin_referer( self::NEW_FORM_PAGE );
-
-		$title = sanitize_text_field( wp_unslash( rgpost( 'giftkit_title' ) ) );
-		if ( '' === $title ) {
-			$title = __( 'Donate', 'giftkit' );
-		}
-		$base = $title;
-		for ( $n = 2; ! GFFormsModel::is_unique_title( $title ); $n++ ) {
-			$title = $base . ' (' . $n . ')';
-		}
-
-		$form_id = Form_Builder::create( $title );
-		if ( is_wp_error( $form_id ) ) {
-			wp_die( esc_html( $form_id->get_error_message() ) );
-		}
-
-		wp_safe_redirect( self::settings_url( $form_id, array( 'giftkit_created' => 1 ) ) );
-		exit;
 	}
 
 	/**
@@ -342,21 +279,6 @@ class Addon extends GFAddOn {
 			),
 			admin_url( 'admin.php' )
 		);
-	}
-
-	/**
-	 * Whether the Stripe add-on has keys for its current mode.
-	 *
-	 * @return bool
-	 */
-	private function stripe_is_connected() {
-		if ( ! function_exists( 'gf_stripe' ) ) {
-			return false;
-		}
-		$settings = gf_stripe()->get_plugin_settings();
-		$mode     = rgar( $settings, 'api_mode', 'test' );
-
-		return (bool) rgar( $settings, $mode . '_publishable_key' );
 	}
 
 	/*

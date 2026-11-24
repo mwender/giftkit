@@ -32,6 +32,7 @@ function giftkit_load() {
 	GFForms::include_addon_framework();
 
 	require_once GIFTKIT_DIR . 'includes/class-form-builder.php';
+	require_once GIFTKIT_DIR . 'includes/class-admin-page.php';
 	require_once GIFTKIT_DIR . 'includes/class-addon.php';
 
 	GFAddOn::register( 'GiftKit\\Addon' );

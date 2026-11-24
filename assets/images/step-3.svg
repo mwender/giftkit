@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 260" role="img" aria-labelledby="t"><title id="t">Page 3: payment</title>
+<rect width="220" height="260" rx="10" fill="#fff"/>
+<g fill="#204ce5"><circle cx="99" cy="20" r="4"/><circle cx="110" cy="20" r="4"/><circle cx="121" cy="20" r="4"/></g>
+<rect x="16" y="38" width="80" height="7" rx="3.5" fill="#646970"/>
+<rect x="16" y="54" width="188" height="66" rx="8" fill="none" stroke="#d5dbe3" stroke-width="1.5"/>
+<rect x="28" y="66" width="26" height="17" rx="3" fill="#1a1f71"/><rect x="62" y="68" width="80" height="6" rx="3" fill="#646970"/><rect x="62" y="78" width="40" height="5" rx="2.5" fill="#b8c1cc"/>
+<rect x="28" y="94" width="164" height="16" rx="4" fill="#2c3338"/><rect x="88" y="100" width="44" height="5" rx="2.5" fill="#fff"/>
+<rect x="16" y="134" width="10" height="10" rx="2" fill="#204ce5"/><rect x="31" y="136" width="150" height="6" rx="3" fill="#b8c1cc"/>
+<rect x="31" y="149" width="120" height="5" rx="2.5" fill="#d5dbe3"/>
+<rect x="16" y="172" width="70" height="6" rx="3" fill="#204ce5"/>
+<text x="16" y="208" font-family="sans-serif" font-size="24" fill="#2c3338">$51.50</text>
+<rect x="16" y="214" width="188" height="2" fill="#b8c1cc"/>
+<rect x="16" y="230" width="36" height="20" rx="4" fill="none" stroke="#b8c1cc" stroke-width="1.5"/>
+<rect x="124" y="226" width="80" height="28" rx="6" fill="#204ce5"/><rect x="142" y="237" width="44" height="6" rx="3" fill="#fff"/>
+</svg>
