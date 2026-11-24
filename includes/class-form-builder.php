@@ -315,8 +315,15 @@ class Form_Builder {
 				}
 			}
 
-			GFAPI::update_feed( $feed_id, $meta, $form['id'] );
+			// GFAPI::update_feed() only finds active feeds, so activate the
+			// feed before writing its meta, then set the state it should have.
+			GFAPI::update_feed_property( $feed_id, 'is_active', 1 );
+			$result = GFAPI::update_feed( $feed_id, $meta, $form['id'] );
 			GFAPI::update_feed_property( $feed_id, 'is_active', $definition['active'] ? 1 : 0 );
+
+			if ( is_wp_error( $result ) && function_exists( 'gf_stripe' ) ) {
+				gf_stripe()->log_error( __METHOD__ . "(): GiftKit couldn't update feed {$feed_id}: " . $result->get_error_message() );
+			}
 		}
 	}
 
