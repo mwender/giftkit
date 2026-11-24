@@ -1,0 +1,264 @@
+/**
+ * GiftKit donation form styles.
+ *
+ * Loaded only where a GiftKit form renders, and written over Gravity Forms'
+ * Orbital theme: selectors start from the wrapper to outrank it. The accent
+ * colour follows the form's Gravity Forms primary colour, so each site's
+ * form styling decides it.
+ */
+
+.giftkit-form_wrapper.gform-theme--framework {
+	--giftkit-accent: var(--gf-color-primary, #204ce5);
+	--giftkit-accent-contrast: var(--gf-color-primary-contrast, #fff);
+	--giftkit-tile-bg: #ececec;
+	--giftkit-tile-text: #6b6b6b;
+	--giftkit-line: #999;
+	--giftkit-radius: 10px;
+}
+
+/* Step dots instead of numbered steps. */
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	border: 0;
+	margin: 0 0 24px;
+	padding: 0;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps .gf_step {
+	width: 12px;
+	height: 12px;
+	margin: 0;
+	padding: 0;
+	border: 2px solid var(--giftkit-accent);
+	border-radius: 50%;
+	background: transparent;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps .gf_step_active,
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps .gf_step_completed {
+	background: var(--giftkit-accent);
+}
+
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps .gf_step_number,
+.giftkit-form_wrapper.gform-theme--framework .gf_page_steps .gf_step_label,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount > .gfield_label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/*
+ * Gift Type toggle and amount buttons: the radio is hidden over its label,
+ * which becomes the button. Orbital lays each choice out as a grid.
+ */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency .gchoice,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets .gchoice {
+	display: block;
+	position: relative;
+	margin: 0;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency input[type=radio],
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets input[type=radio] {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency label.gform-field-label,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets label.gform-field-label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 64px;
+	margin: 0;
+	padding: 12px;
+	background: var(--giftkit-tile-bg);
+	color: var(--giftkit-tile-text);
+	font-size: 1.35rem;
+	line-height: 1.2;
+	text-align: center;
+	box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
+	transition: background-color 0.15s, color 0.15s;
+	cursor: pointer;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency input[type=radio]:checked + label.gform-field-label,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets input[type=radio]:checked + label.gform-field-label {
+	background: var(--giftkit-accent);
+	color: var(--giftkit-accent-contrast);
+	font-weight: 600;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency input[type=radio]:focus-visible + label.gform-field-label,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets input[type=radio]:focus-visible + label.gform-field-label {
+	outline: 3px solid var(--giftkit-accent);
+	outline-offset: 2px;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency .gfield_radio {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0;
+	border-radius: var(--giftkit-radius);
+	overflow: hidden;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency label.gform-field-label {
+	min-height: 72px;
+	font-size: 1.5rem;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets .gfield_radio {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-presets label.gform-field-label {
+	border-radius: var(--giftkit-radius);
+}
+
+@media (max-width: 600px) {
+	.giftkit-form_wrapper.gform-theme--framework .giftkit-presets .gfield_radio {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 10px;
+	}
+}
+
+/* The amount: a large "$ ___ USD" line. */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount .ginput_container,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-total .ginput_container_total {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	border-bottom: 2px solid var(--giftkit-line);
+	padding-bottom: 4px;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount .ginput_container::before {
+	content: attr(data-giftkit-symbol);
+	font-size: 3rem;
+	line-height: 1;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount .ginput_container::after,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-total .ginput_container_total::after {
+	content: attr(data-giftkit-currency);
+	margin-left: auto;
+	font-size: 1.1rem;
+	white-space: nowrap;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount input {
+	flex: 1;
+	min-width: 0;
+	height: auto;
+	padding: 0;
+	border: 0;
+	box-shadow: none;
+	background: transparent;
+	font-size: 3rem;
+	line-height: 1.1;
+	-moz-appearance: textfield !important;
+	appearance: textfield !important;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount input::-webkit-inner-spin-button,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount input::-webkit-outer-spin-button {
+	-webkit-appearance: none !important;
+	display: none;
+	margin: 0;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-amount input:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+/* Section headings. */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-contact-heading,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-billing-heading {
+	border: 0;
+	padding: 0;
+	margin-top: 8px;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-contact-heading .gsection_title,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-billing-heading .gsection_title {
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-fee .gfield_description {
+	font-style: italic;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-summary {
+	font-size: 1.15rem;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-edit-amount {
+	color: var(--giftkit-accent);
+}
+
+/*
+ * The products only drive the total. Keep them out of sight without
+ * display:none, which Gravity Forms would read as conditionally hidden.
+ */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-gift-product,
+.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-product {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* The total, with "One-time gift" or "Monthly gift, …" above it. */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-total .ginput_total {
+	flex: 1;
+	min-width: 0;
+	font-size: 3rem;
+	line-height: 1.1;
+	color: inherit;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-frequency-note {
+	margin: 0 0 4px;
+	font-size: 1.15rem;
+	font-weight: 600;
+	color: var(--giftkit-accent);
+}
+
+/* Buttons: Back on the left, Continue / Donate large on the right. */
+.giftkit-form_wrapper.gform-theme--framework .gform_page_footer,
+.giftkit-form_wrapper.gform-theme--framework .gform_footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+}
+
+/* Orbital's button rules outrank these, hence !important. */
+.giftkit-form_wrapper.gform-theme--framework .gform_page_footer .gform_next_button,
+.giftkit-form_wrapper.gform-theme--framework .gform_page_footer .gform_button,
+.giftkit-form_wrapper.gform-theme--framework .gform_footer .gform_button {
+	flex: 0 1 50%;
+	margin-left: auto !important;
+	min-height: 64px !important;
+	border-radius: var(--giftkit-radius) !important;
+	font-size: 1.5rem !important;
+	font-weight: 600 !important;
+}

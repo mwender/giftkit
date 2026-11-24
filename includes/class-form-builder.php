@@ -127,7 +127,7 @@ class Form_Builder {
 	 * @return \GF_Field|null
 	 */
 	public static function field( $form, $role ) {
-		foreach ( (array) rgar( $form, 'fields' ) as $field ) {
+		foreach ( ( rgar( $form, 'fields' ) ?: array() ) as $field ) {
 			if ( rgobj( $field, self::ROLE ) === $role ) {
 				return $field;
 			}
@@ -233,7 +233,7 @@ class Form_Builder {
 		}
 
 		// Thank-you message, kept in the default confirmation.
-		foreach ( (array) rgar( $form, 'confirmations' ) as $id => $confirmation ) {
+		foreach ( ( rgar( $form, 'confirmations' ) ?: array() ) as $id => $confirmation ) {
 			if ( rgar( $confirmation, 'isDefault' ) && 'message' === rgar( $confirmation, 'type' ) ) {
 				$form['confirmations'][ $id ]['message'] = $settings['confirmationMessage'];
 			}
@@ -250,7 +250,7 @@ class Form_Builder {
 	 * @return array|null
 	 */
 	public static function message_confirmation( $form ) {
-		foreach ( (array) rgar( $form, 'confirmations' ) as $confirmation ) {
+		foreach ( ( rgar( $form, 'confirmations' ) ?: array() ) as $confirmation ) {
 			if ( rgar( $confirmation, 'isDefault' ) ) {
 				return 'message' === rgar( $confirmation, 'type' ) ? $confirmation : null;
 			}
@@ -537,6 +537,7 @@ class Form_Builder {
 				'labelPlacement' => 'hidden_label',
 				'isRequired'     => true,
 				'addressType'    => 'international',
+				'defaultCountry' => self::default_country(),
 				'inputs'         => array(
 					array( 'id' => '.1', 'label' => __( 'Address', 'giftkit' ), 'customLabel' => __( 'Address', 'giftkit' ) ),
 					array( 'id' => '.2', 'label' => __( 'Address Line 2', 'giftkit' ) ),
@@ -638,7 +639,7 @@ class Form_Builder {
 			$field[ self::ROLE ]   = $field['role'];
 			unset( $field['role'] );
 
-			foreach ( (array) rgar( $field, 'inputs' ) as $i => $input ) {
+			foreach ( isset( $field['inputs'] ) ? $field['inputs'] : array() as $i => $input ) {
 				$field['inputs'][ $i ] = array_merge( array( 'name' => '' ), $input, array( 'id' => $id . $input['id'] ) );
 			}
 		}
@@ -699,6 +700,50 @@ class Form_Builder {
 				),
 			),
 		);
+	}
+
+	/**
+	 * The address field's default country, guessed from the site's currency.
+	 *
+	 * Only currencies used by a single country are mapped; others (EUR, for
+	 * one) leave the choice to the donor. Site owners can change the default
+	 * on the Address field.
+	 *
+	 * @return string A country name as Gravity Forms lists it, or ''.
+	 */
+	public static function default_country() {
+		$countries = array(
+			'AUD' => 'Australia',
+			'BRL' => 'Brazil',
+			'CAD' => 'Canada',
+			'CHF' => 'Switzerland',
+			'CZK' => 'Czechia',
+			'DKK' => 'Denmark',
+			'GBP' => 'United Kingdom',
+			'HKD' => 'Hong Kong',
+			'HUF' => 'Hungary',
+			'ILS' => 'Israel',
+			'JPY' => 'Japan',
+			'MXN' => 'Mexico',
+			'NOK' => 'Norway',
+			'NZD' => 'New Zealand',
+			'PHP' => 'Philippines',
+			'PLN' => 'Poland',
+			'SEK' => 'Sweden',
+			'SGD' => 'Singapore',
+			'THB' => 'Thailand',
+			'TWD' => 'Taiwan',
+			'USD' => 'United States',
+			'ZAR' => 'South Africa',
+		);
+
+		/**
+		 * Filters the default country for new GiftKit forms' address field.
+		 *
+		 * @param string $country  Country name, or '' for none.
+		 * @param string $currency The site's Gravity Forms currency code.
+		 */
+		return apply_filters( 'giftkit_default_country', rgar( $countries, GFCommon::get_currency() ), GFCommon::get_currency() );
 	}
 
 	/**
