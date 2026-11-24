@@ -85,7 +85,7 @@ class Addon extends GFAddOn {
 		parent::init_admin();
 		add_filter( 'gform_addon_navigation', array( $this, 'add_menu_item' ) );
 		add_action( 'admin_post_' . Admin_Page::SLUG, array( Admin_Page::class, 'handle_create' ) );
-		add_action( 'admin_footer', array( $this, 'print_forms_list_button' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_forms_list_button' ) );
 	}
 
 	/*
@@ -235,7 +235,7 @@ class Addon extends GFAddOn {
 	 * the markup ever changes, the button just doesn't appear; the Forms menu
 	 * item still works.
 	 */
-	public function print_forms_list_button() {
+	public function enqueue_forms_list_button() {
 		if ( 'gf_edit_forms' !== rgget( 'page' ) || rgget( 'id' ) || ! GFCommon::current_user_can_any( 'gravityforms_create_form' ) ) {
 			return;
 		}
@@ -255,7 +255,9 @@ class Addon extends GFAddOn {
 			wp_json_encode( __( 'New Donation Form', 'giftkit' ) )
 		);
 
-		wp_print_inline_script_tag( $script );
+		wp_register_script( 'giftkit-forms-list', false, array(), $this->_version, true );
+		wp_enqueue_script( 'giftkit-forms-list' );
+		wp_add_inline_script( 'giftkit-forms-list', $script );
 	}
 
 	/**

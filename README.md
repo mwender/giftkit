@@ -41,6 +41,14 @@ GiftKit is built on Gravity Forms' own fields, pricing and the official Stripe A
 
 GiftKit isn't affiliated with or endorsed by Gravity Forms or Stripe.
 
+## External services ##
+
+GiftKit doesn't connect to any external service itself. Its forms take payments through the Gravity Forms Stripe Add-On, which sends payment details to [Stripe](https://stripe.com/).
+
+When a donor submits a GiftKit form, the Stripe Add-On sends Stripe the gift amount, whether it's one-time or monthly, the donor's name, email address and billing address, and the donor's note, phone number and business name (if given) as payment metadata. Card details go directly from the donor's browser to Stripe. Stripe uses this to take the payment, set up monthly subscriptions and send receipts.
+
+Stripe's [terms of service](https://stripe.com/legal) and [privacy policy](https://stripe.com/privacy) apply.
+
 ## Installation ##
 
 1. Install and activate Gravity Forms and the Gravity Forms Stripe Add-On, and connect Stripe under Forms → Settings → Stripe.
@@ -88,9 +96,9 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 ## Changelog ##
 
 ### 0.1.0 ###
-* Initial development release.
+* Initial release.
 
 ## Upgrade Notice ##
 
 ### 0.1.0 ###
-Initial development release.
+Initial release.
