@@ -1,0 +1,16 @@
+{
+  "name": "giftkit",
+  "private": true,
+  "description": "Development tooling for GiftKit for Gravity Forms. Not shipped with the plugin.",
+  "author": "Michael Wender",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "readme": "wp-readme-to-md --screenshot-url='.wordpress-org/{screenshot}.png' && node bin/readme-banner.js",
+    "assets": "node bin/render-assets.js",
+    "zip": "bin/build-zip.sh"
+  },
+  "devDependencies": {
+    "playwright": "1.59.1",
+    "wp-readme-to-markdown": "^1.0.1"
+  }
+}

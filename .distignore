@@ -2,9 +2,12 @@
 /.github
 /.wordpress-org
 /node_modules
+/bin
 
 .distignore
 .gitignore
-README.md
 AGENTS.md
 CLAUDE.md
+README.md
+package.json
+package-lock.json

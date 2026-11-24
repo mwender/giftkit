@@ -33,6 +33,17 @@ This checkout lives in a dedicated plain-WordPress site, deliberately not Bedroc
 
 Sibling plugins may join it later under `~/webdev/wordpress-plugins/` (e.g. `localdev-switcher`).
 
+## Packaging and releases
+
+GiftKit follows the same setup as `mwender/localdev-switcher`, which is already on WordPress.org.
+
+- **`readme.txt` is the source** for the WordPress.org listing. `README.md` is generated from it with `npm run readme`, which also puts the banner back at the top (`bin/readme-banner.js`). Edit `readme.txt`, never `README.md`, and regenerate before committing.
+- **`.wordpress-org/`** holds the listing's assets: `banner-772x250.png` and `banner-1544x500.png`, `icon.svg` plus `icon-128x128.png` and `icon-256x256.png`, and `screenshot-N.png` matching the numbered captions under `== Screenshots ==` in `readme.txt`. The banner's source is `bin/assets/banner.html`; `npm run assets` re-renders the banners and PNG icons with Playwright (set `CHROMIUM_PATH` to use the Mini's cached Chromium).
+- **`.distignore`** decides what ships. `npm run zip` (`bin/build-zip.sh`) builds `dist/giftkit.zip` the same way the deploy action does, with rsync and `.distignore`. Check a release by running WordPress.org's Plugin Check on that build, in a folder named `giftkit` (in this checkout's folder it reports a false text-domain mismatch, because it expects the folder name).
+- **Deploying:** publishing a GitHub release runs `.github/workflows/deploy.yml` (10up's deploy action), which commits the release to WordPress.org SVN and attaches the zip to the release. `update-assets.yml`, run by hand, pushes only `readme.txt` and `.wordpress-org/`, which is how a "Tested up to" bump reaches WordPress.org without a release. Both need the repository secrets `SVN_USERNAME`, `SVN_PASSWORD` and `GH_RELEASE_TOKEN`, which can only be set once WordPress.org has approved the plugin.
+- **The first submission** is a manual upload of the zip at https://wordpress.org/plugins/developers/add/. SVN access, and so the workflows, follow approval.
+- A release bumps the version in three places: `giftkit.php` (header and `GIFTKIT_VERSION`), `readme.txt` (`Stable tag` and the changelog), then `npm run readme`.
+
 ## Working conventions
 
 - Commit on a branch and open a pull request for anything beyond small fixes; `main` is what sites install from GitHub.
