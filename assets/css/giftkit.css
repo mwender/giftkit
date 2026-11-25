@@ -262,3 +262,26 @@
 	font-size: 1.5rem !important;
 	font-weight: 600 !important;
 }
+
+/*
+ * "Powered by GiftKit", shown only when the site owner turns it on. It sits
+ * after the form's wrapper, so it's styled on its own.
+ */
+.giftkit-credit {
+	margin: 18px 0 0;
+	font-size: 0.85rem;
+	line-height: 1.4;
+	text-align: left;
+	opacity: 0.75;
+}
+
+.giftkit-credit a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.giftkit-credit a:hover,
+.giftkit-credit a:focus-visible {
+	opacity: 1;
+}

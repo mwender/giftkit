@@ -54,6 +54,8 @@ class Form_Builder {
 			/* translators: %s: site name */
 			'subscriptionName'    => sprintf( __( 'Monthly donation to %s', 'giftkit' ), get_bloginfo( 'name' ) ),
 			'portalUrl'           => '',
+			// Off unless the site owner turns it on (WordPress.org guideline 10).
+			'showCredit'          => '0',
 			'confirmationMessage' => __( 'Thank you for your gift!', 'giftkit' ),
 		);
 	}

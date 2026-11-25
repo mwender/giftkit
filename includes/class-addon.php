@@ -30,6 +30,11 @@ class Addon extends GFAddOn {
 	protected $_capabilities_form_settings = 'gravityforms_edit_forms';
 
 	/**
+	 * GiftKit's website.
+	 */
+	const SITE_URL = 'https://giftkit.org/';
+
+	/**
 	 * Where GiftKit's documentation lives (the website built from docs/).
 	 */
 	const DOCS_URL = 'https://giftkit.org/docs/';
@@ -83,6 +88,7 @@ class Addon extends GFAddOn {
 		add_filter( 'gform_field_css_class', array( $this, 'add_field_class' ), 10, 3 );
 		add_filter( 'gform_replace_merge_tags', array( $this, 'replace_manage_gift_tag' ), 10, 7 );
 		add_filter( 'gform_custom_merge_tags', array( $this, 'add_manage_gift_tag' ), 10, 4 );
+		add_filter( 'gform_get_form_filter', array( $this, 'add_credit' ), 10, 2 );
 	}
 
 	/**
@@ -206,6 +212,27 @@ class Addon extends GFAddOn {
 		 * @param array  $entry  The entry.
 		 */
 		return apply_filters( 'giftkit_manage_gift_link_html', '<p class="giftkit-manage-gift">' . wp_kses( $link, array( 'a' => array( 'href' => array() ) ) ) . '</p>', $portal, $form, $entry );
+	}
+
+	/**
+	 * Adds a "Powered by GiftKit" link under the form, only when the site
+	 * owner has turned it on.
+	 *
+	 * @param string $html The form's markup.
+	 * @param array  $form The form.
+	 *
+	 * @return string
+	 */
+	public function add_credit( $html, $form ) {
+		if ( ! Form_Builder::is_giftkit_form( $form ) || '1' !== (string) rgars( $form, 'giftkit/showCredit' ) ) {
+			return $html;
+		}
+
+		return $html . sprintf(
+			'<p class="giftkit-credit"><a href="%1$s" target="_blank" rel="noopener">%2$s</a></p>',
+			esc_url( self::SITE_URL ),
+			esc_html__( 'Powered by GiftKit', 'giftkit' )
+		);
 	}
 
 	/**
@@ -598,7 +625,19 @@ class Addon extends GFAddOn {
 			);
 		}
 
-		return array( $gift, $fee, $thanks );
+		$credit = array(
+			'title'  => esc_html__( 'Credit', 'giftkit' ),
+			'fields' => array(
+				array(
+					'name'        => 'showCredit',
+					'label'       => esc_html__( 'Show "Powered by GiftKit" below the form', 'giftkit' ),
+					'type'        => 'toggle',
+					'description' => esc_html__( 'Adds a small link to giftkit.org under the form. It\'s off unless you turn it on, and the form works the same either way.', 'giftkit' ),
+				),
+			),
+		);
+
+		return array( $gift, $fee, $thanks, $credit );
 	}
 
 	/**

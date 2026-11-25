@@ -78,6 +78,10 @@ Yes. Turn off "Offer monthly gifts" on the Donation tab, or set the fee percenta
 
 Yes. Turn on Stripe's no-code customer portal link in your Stripe Dashboard, then paste it into "Manage-your-gift link" on the Donation tab. Monthly donors then see a "manage your monthly gift" link in the thank-you message, with their email filled in. Step-by-step instructions: https://giftkit.org/docs/stripe-customer-portal/
 
+### Does GiftKit add a link to its website on my form? ###
+
+Only if you choose to. "Show 'Powered by GiftKit' below the form" on the Donation tab is off by default, and the form works the same either way.
+
 ### Which currencies work? ###
 
 Whichever currency Gravity Forms is set to. Amounts and totals use its symbol and formatting.
