@@ -280,7 +280,7 @@ class Addon extends GFAddOn {
 			array(
 				'handle'    => 'giftkit',
 				'src'       => $this->get_base_url() . '/assets/js/giftkit.js',
-				'version'   => self::asset_version( 'assets/js/giftkit.js' ),
+				'version'   => $this->_version,
 				'deps'      => array( 'jquery', 'gform_gravityforms' ),
 				'in_footer' => true,
 				'strings'   => $this->script_strings(),
@@ -289,7 +289,7 @@ class Addon extends GFAddOn {
 			array(
 				'handle'    => 'giftkit-admin',
 				'src'       => $this->get_base_url() . '/assets/js/admin.js',
-				'version'   => self::asset_version( 'assets/js/admin.js' ),
+				'version'   => $this->_version,
 				'in_footer' => true,
 				'enqueue'   => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
 			),
@@ -306,32 +306,18 @@ class Addon extends GFAddOn {
 			array(
 				'handle'  => 'giftkit',
 				'src'     => $this->get_base_url() . '/assets/css/giftkit.css',
-				'version' => self::asset_version( 'assets/css/giftkit.css' ),
+				'version' => $this->_version,
 				'enqueue' => array( array( $this, 'form_needs_assets' ) ),
 			),
 			array(
 				'handle'  => 'giftkit-admin',
 				'src'     => $this->get_base_url() . '/assets/css/admin.css',
-				'version' => self::asset_version( 'assets/css/admin.css' ),
+				'version' => $this->_version,
 				'enqueue' => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
 			),
 		);
 
 		return array_merge( parent::styles(), $styles );
-	}
-
-	/**
-	 * An asset's version: its file's modification time, so a changed file
-	 * always reaches browsers (falls back to the plugin version).
-	 *
-	 * @param string $path Path relative to the plugin folder.
-	 *
-	 * @return string
-	 */
-	private static function asset_version( $path ) {
-		$file = GIFTKIT_DIR . $path;
-
-		return file_exists( $file ) ? (string) filemtime( $file ) : GIFTKIT_VERSION;
 	}
 
 	/**

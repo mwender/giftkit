@@ -60,5 +60,4 @@ To preview locally: `npm run site`, then serve `_site/` (for example `python3 -m
 ## Working conventions
 
 - Commit on a branch and open a pull request for anything beyond small fixes; `main` is what sites install from GitHub.
-- Enqueued CSS and JS are versioned with `filemtime()` (`Addon::asset_version()`), Michael's convention in all his plugins, so a changed file reaches browsers without a version bump.
 - Check live state rather than trusting notes: `wp plugin list` for what's active, `git status` for the checkout, `gh repo view mwender/giftkit` for the remote.
