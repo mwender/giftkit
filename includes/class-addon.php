@@ -547,6 +547,13 @@ class Addon extends GFAddOn {
 			$settings['confirmationMessage'] = rgar( $confirmation, 'message' );
 		}
 
+		// The toggle reflects the notification itself, which can also be
+		// switched off under Notifications.
+		$donor = rgars( $form, 'notifications/' . Form_Builder::DONOR_NOTIFICATION );
+		if ( $donor ) {
+			$settings['donorEmail'] = rgar( $donor, 'isActive' ) ? '1' : '0';
+		}
+
 		return $settings;
 	}
 
@@ -710,9 +717,23 @@ class Addon extends GFAddOn {
 			);
 		}
 
+		$has_donor_email = (bool) rgars( $form, 'notifications/' . Form_Builder::DONOR_NOTIFICATION );
+		$donor_field     = array(
+			'name'        => 'donorEmail',
+			'label'       => esc_html__( 'Email donors a thank-you', 'giftkit' ),
+			'type'        => 'toggle',
+			'description' => $has_donor_email
+				? sprintf(
+					/* translators: %s: link to the notification */
+					esc_html__( 'Sends each donor a thank-you with a summary of their gift. Monthly donors also get the manage-your-gift link. %s', 'giftkit' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=gf_edit_forms&view=settings&subview=notification&id=' . absint( $form['id'] ) . '&nid=' . Form_Builder::DONOR_NOTIFICATION ) ) . '">' . esc_html__( 'Edit the email', 'giftkit' ) . '</a>'
+				)
+				: esc_html__( 'Sends each donor a thank-you with a summary of their gift. This form doesn\'t have it yet: leave this on and click Save Settings to add it.', 'giftkit' ),
+		);
+
 		$thanks = array(
 			'title'  => esc_html__( 'After the gift', 'giftkit' ),
-			'fields' => array( $thanks_field ),
+			'fields' => array( $thanks_field, $donor_field ),
 		);
 
 		if ( rgget( 'giftkit_created' ) ) {

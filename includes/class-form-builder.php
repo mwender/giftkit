@@ -39,6 +39,11 @@ class Form_Builder {
 	const MANAGE_GIFT_TAG = '{giftkit_manage_gift_link}';
 
 	/**
+	 * ID of the donor thank-you notification in a form's notifications.
+	 */
+	const DONOR_NOTIFICATION = 'giftkit-donor';
+
+	/**
 	 * Default settings for a new form.
 	 *
 	 * @return array
@@ -58,6 +63,7 @@ class Form_Builder {
 			'portalUrl'           => '',
 			// Off unless the site owner turns it on (WordPress.org guideline 10).
 			'showCredit'          => '0',
+			'donorEmail'          => '1',
 			// Empty: Gravity Forms' own primary color.
 			'accentColor'         => '',
 			'confirmationMessage' => __( 'Thank you for your gift!', 'giftkit' ),
@@ -253,7 +259,91 @@ class Form_Builder {
 			}
 		}
 
+		// Donor thank-you email: switched on or off, and created if it's
+		// wanted but missing (forms made before it existed, or deleted).
+		$donor_email = '1' === (string) $settings['donorEmail'];
+		if ( isset( $form['notifications'][ self::DONOR_NOTIFICATION ] ) ) {
+			$form['notifications'][ self::DONOR_NOTIFICATION ]['isActive'] = $donor_email;
+		} elseif ( $donor_email ) {
+			$notification = self::donor_notification( $form );
+			if ( $notification ) {
+				$form['notifications'][ self::DONOR_NOTIFICATION ] = $notification;
+			}
+		}
+
 		return $form;
+	}
+
+	/**
+	 * The donor thank-you notification for a form: sent to the donor when
+	 * the form is submitted, which only happens once Stripe has accepted the
+	 * payment.
+	 *
+	 * @param array $form The form.
+	 *
+	 * @return array|null Null if the form lacks the fields it needs.
+	 */
+	public static function donor_notification( $form ) {
+		$name      = self::field( $form, 'name' );
+		$email     = self::field( $form, 'email' );
+		$total     = self::field( $form, 'total' );
+		$frequency = self::field( $form, 'frequency' );
+		$note      = self::field( $form, 'note' );
+		if ( ! $email || ! $total ) {
+			return null;
+		}
+
+		$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		$tag  = function ( $field, $input = '' ) {
+			return '{' . $field->label . ':' . $field->id . $input . '}';
+		};
+
+		$summary = array(
+			/* translators: %s: gift total merge tag */
+			sprintf( __( 'Amount: %s', 'giftkit' ), $tag( $total ) ),
+		);
+		if ( $frequency ) {
+			/* translators: %s: gift type merge tag (One Time Gift or Monthly Gift) */
+			$summary[] = sprintf( __( 'Gift type: %s', 'giftkit' ), $tag( $frequency ) );
+		}
+		/* translators: %s: date merge tag */
+		$summary[] = sprintf( __( 'Date: %s', 'giftkit' ), '{date_mdy}' );
+
+		$message = array(
+			/* translators: %s: donor's first name merge tag */
+			'<p>' . ( $name ? sprintf( __( 'Dear %s,', 'giftkit' ), $tag( $name, '.3' ) ) : __( 'Hello,', 'giftkit' ) ) . '</p>',
+			/* translators: %s: site name */
+			'<p>' . sprintf( __( 'Thank you for your gift to %s. It means a great deal to us.', 'giftkit' ), esc_html( $site ) ) . '</p>',
+			'<p><strong>' . __( 'Your gift', 'giftkit' ) . '</strong><br>' . implode( '<br>', $summary ) . '</p>',
+		);
+		if ( $note ) {
+			// Only shown when the donor left a note.
+			$message[] = sprintf(
+				'[gravityforms action="conditional" merge_tag="%1$s" condition="isnot" value=""]<p>%2$s</p>[/gravityforms]',
+				esc_attr( $tag( $note ) ),
+				/* translators: %s: donor's note merge tag */
+				sprintf( __( 'Your note: %s', 'giftkit' ), $tag( $note ) )
+			);
+		}
+		$message[] = self::MANAGE_GIFT_TAG;
+		/* translators: %s: site name */
+		$message[] = '<p>' . sprintf( __( 'With gratitude,<br>%s', 'giftkit' ), esc_html( $site ) ) . '</p>';
+
+		return array(
+			'id'                => self::DONOR_NOTIFICATION,
+			'name'              => __( 'Donor Thank-You', 'giftkit' ),
+			'isActive'          => true,
+			'event'             => 'form_submission',
+			'toType'            => 'field',
+			'to'                => (string) $email->id,
+			'from'              => '{admin_email}',
+			'fromName'          => $site,
+			'replyTo'           => '{admin_email}',
+			/* translators: %s: site name */
+			'subject'           => sprintf( __( 'Thank you for your gift to %s', 'giftkit' ), $site ),
+			'message'           => implode( "\n", $message ),
+			'disableAutoformat' => true,
+		);
 	}
 
 	/**

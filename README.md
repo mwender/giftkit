@@ -29,6 +29,7 @@ Building a good donation form in Gravity Forms takes a lot of setup: pages, pric
 
 * Forms → New Donation Form creates the form, both Stripe feeds and, if you like, a draft page to hold it
 * A Donation settings tab for the preset amounts, minimum gift, monthly gifts, the fee and its note, the button color, and the thank-you message, with the form's shortcode ready to copy
+* A thank-you email for every donor, with a summary of their gift
 * A minimum gift, which also discourages bots that test stolen cards with tiny amounts
 * Everything else stays ordinary Gravity Forms: entries, notifications, confirmations and add-ons all work as usual
 

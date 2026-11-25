@@ -36,7 +36,7 @@ While you're in Stripe, check which payment methods are turned on in your Stripe
 4. If you want a new page for the form, leave **Also create a page for the form** ticked and give the page a title. It's saved as a draft, so nothing goes public yet. Untick it if you'll add the form to an existing page.
 5. Click **Create Donation Form**.
 
-GiftKit creates the form, its two Stripe feeds (one for one-time gifts, one for monthly gifts), a thank-you message and an admin notification. The next screen links to everything you'll want to do next.
+GiftKit creates the form, its two Stripe feeds (one for one-time gifts, one for monthly gifts), a thank-you message, a thank-you email for donors and an admin notification. The next screen links to everything you'll want to do next.
 
 ## 4. Adjust the settings
 
@@ -56,7 +56,7 @@ Then check:
 
 - **Forms → Entries:** each gift is there, and after a moment its payment shows as paid (one-time) or active (monthly). If they stay "Processing", the webhook isn't reaching your site: click **Configure Webhooks** again.
 - **Stripe Dashboard:** each payment and subscription is there. One-time gifts are described with the gift, any fee and the entry number.
-- **Your email:** the admin notification arrived.
+- **Your email:** the admin notification arrived, and so did the donor thank-you, at the address you gave as the donor.
 
 ## 7. Go live
 

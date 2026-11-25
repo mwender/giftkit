@@ -40,6 +40,14 @@ It can use Gravity Forms merge tags, such as the donor's first name or the gift 
 
 If you set the confirmation to send donors to a page or URL instead of showing a message, this setting is replaced by a link to **Confirmations**.
 
+**Email donors a thank-you.** Sends each donor an email after their gift: a thank-you, a summary of the gift (amount, one-time or monthly, and the date), their note if they left one, and for monthly donors the manage-your-gift link. It's an ordinary Gravity Forms notification called "Donor Thank-You", so **Edit the email** opens it under **Settings → Notifications**, where you can change the wording, the sender or the subject. Turning this off switches the notification off.
+
+Donors may also get Stripe's own payment receipt, depending on your Stripe email settings. That's a payment record; GiftKit's email is the thank-you.
+
+If your organization gives donors a written acknowledgement for tax purposes, add the wording you need to the email, for example a line saying whether any goods or services were provided in exchange for the gift. What's required depends on your country and your organization, so GiftKit doesn't add it for you.
+
+Forms created before GiftKit added this email don't have it yet: open the Donation tab, leave this on, and click **Save Settings**.
+
 ## Credit
 
 **Show "Powered by GiftKit" below the form.** Adds a small GiftKit logo and link under the form. It's off unless you turn it on, and the form works the same either way.
