@@ -56,6 +56,8 @@ class Form_Builder {
 			'portalUrl'           => '',
 			// Off unless the site owner turns it on (WordPress.org guideline 10).
 			'showCredit'          => '0',
+			// Empty: Gravity Forms' own primary color.
+			'accentColor'         => '',
 			'confirmationMessage' => __( 'Thank you for your gift!', 'giftkit' ),
 		);
 	}

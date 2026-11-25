@@ -113,8 +113,22 @@ class Addon extends GFAddOn {
 	 * @return array
 	 */
 	public function add_form_class( $form ) {
-		if ( Form_Builder::is_giftkit_form( $form ) ) {
-			$form['cssClass'] = trim( rgar( $form, 'cssClass' ) . ' giftkit-form' );
+		if ( ! Form_Builder::is_giftkit_form( $form ) ) {
+			return $form;
+		}
+
+		$form['cssClass'] = trim( rgar( $form, 'cssClass' ) . ' giftkit-form' );
+
+		// The Donation tab's accent color becomes the form's Gravity Forms
+		// primary color, unless the embed (shortcode or block) set its own.
+		// false means the embed turned Gravity Forms' styles off; leave it.
+		$accent = (string) rgars( $form, 'giftkit/accentColor' );
+		if ( '' !== $accent && false !== rgar( $form, 'styles' ) ) {
+			$styles = is_array( rgar( $form, 'styles' ) ) ? $form['styles'] : array();
+			if ( empty( $styles['buttonPrimaryBackgroundColor'] ) ) {
+				$styles['buttonPrimaryBackgroundColor'] = $accent;
+				$form['styles']                         = $styles;
+			}
 		}
 
 		return $form;
@@ -290,8 +304,9 @@ class Addon extends GFAddOn {
 				'handle'    => 'giftkit-admin',
 				'src'       => $this->get_base_url() . '/assets/js/admin.js',
 				'version'   => $this->_version,
+				'deps'      => array( 'jquery', 'wp-color-picker' ),
 				'in_footer' => true,
-				'enqueue'   => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
+				'enqueue'   => self::admin_asset_pages(),
 			),
 		);
 
@@ -313,11 +328,25 @@ class Addon extends GFAddOn {
 				'handle'  => 'giftkit-admin',
 				'src'     => $this->get_base_url() . '/assets/css/admin.css',
 				'version' => $this->_version,
-				'enqueue' => array( array( 'query' => 'page=' . Admin_Page::SLUG ) ),
+				'deps'    => array( 'wp-color-picker' ),
+				'enqueue' => self::admin_asset_pages(),
 			),
 		);
 
 		return array_merge( parent::styles(), $styles );
+	}
+
+	/**
+	 * Where GiftKit's admin script and styles load: the New Donation Form
+	 * page, and a form's Donation tab.
+	 *
+	 * @return array Enqueue conditions.
+	 */
+	private static function admin_asset_pages() {
+		return array(
+			array( 'query' => 'page=' . Admin_Page::SLUG ),
+			array( 'query' => 'page=gf_edit_forms&view=settings&subview=giftkit' ),
+		);
 	}
 
 	/**
@@ -480,6 +509,10 @@ class Addon extends GFAddOn {
 			$settings['presets'] = Form_Builder::presets_to_string( Form_Builder::parse_presets( $settings['presets'] ) );
 		}
 
+		if ( isset( $settings['accentColor'] ) ) {
+			$settings['accentColor'] = (string) sanitize_hex_color( trim( $settings['accentColor'] ) );
+		}
+
 		// With a portal link set, make sure the thank-you message shows it.
 		if ( ! empty( $settings['portalUrl'] ) && isset( $settings['confirmationMessage'] ) && false === strpos( $settings['confirmationMessage'], Form_Builder::MANAGE_GIFT_TAG ) ) {
 			$settings['confirmationMessage'] = rtrim( $settings['confirmationMessage'] ) . "\n\n" . Form_Builder::MANAGE_GIFT_TAG;
@@ -624,12 +657,40 @@ class Addon extends GFAddOn {
 		);
 
 		if ( rgget( 'giftkit_created' ) ) {
-			$gift['description'] = sprintf(
-				/* translators: %s: shortcode */
-				esc_html__( 'Your donation form is ready. Adjust the settings below, then add it to a page with %s.', 'giftkit' ),
-				'<code>[gravityform id="' . absint( $form['id'] ) . '" title="false" ajax="true"]</code>'
-			);
+			$gift['description'] = esc_html__( 'Your donation form is ready. Adjust the settings below.', 'giftkit' );
 		}
+
+		$embed = array(
+			'title'  => esc_html__( 'Add the form to a page', 'giftkit' ),
+			'fields' => array(
+				array(
+					'name' => 'embedShortcode',
+					'type' => 'html',
+					'html' => sprintf(
+						'<p>%1$s</p><span class="giftkit-embed giftkit-embed--settings"><input type="text" readonly value="%2$s" aria-label="%3$s"><button type="button" class="button giftkit-copy" data-copied="%4$s">%5$s</button></span>',
+						esc_html__( 'Paste this shortcode into any page, or use the Gravity Forms block and choose this form.', 'giftkit' ),
+						esc_attr( Admin_Page::shortcode( $form['id'] ) ),
+						esc_attr__( 'Embed shortcode', 'giftkit' ),
+						esc_attr__( 'Copied', 'giftkit' ),
+						esc_html__( 'Copy', 'giftkit' )
+					),
+				),
+			),
+		);
+
+		$appearance = array(
+			'title'  => esc_html__( 'Appearance', 'giftkit' ),
+			'fields' => array(
+				array(
+					'name'                => 'accentColor',
+					'label'               => esc_html__( 'Button and accent color', 'giftkit' ),
+					'type'                => 'text',
+					'class'               => 'giftkit-color',
+					'description'         => esc_html__( 'Used for buttons, the chosen amount and the gift type toggle. Leave it empty to use Gravity Forms\' default. A color set on a block or shortcode takes priority.', 'giftkit' ),
+					'validation_callback' => array( $this, 'validate_color' ),
+				),
+			),
+		);
 
 		$credit = array(
 			'title'  => esc_html__( 'Credit', 'giftkit' ),
@@ -643,7 +704,7 @@ class Addon extends GFAddOn {
 			),
 		);
 
-		return array( $gift, $fee, $thanks, $credit );
+		return array( $embed, $gift, $fee, $appearance, $thanks, $credit );
 	}
 
 	/**
@@ -655,6 +716,18 @@ class Addon extends GFAddOn {
 	public function validate_presets( $field, $value ) {
 		if ( ! Form_Builder::parse_presets( $value ) ) {
 			$field->set_error( esc_html__( 'Enter at least one amount, such as 25, 50, 100.', 'giftkit' ) );
+		}
+	}
+
+	/**
+	 * The value must be empty or a hex color such as #0a79b8.
+	 *
+	 * @param \Gravity_Forms\Gravity_Forms\Settings\Fields\Base $field The setting.
+	 * @param string                                             $value Its value.
+	 */
+	public function validate_color( $field, $value ) {
+		if ( '' !== trim( (string) $value ) && ! sanitize_hex_color( trim( $value ) ) ) {
+			$field->set_error( esc_html__( 'Enter a color as a hex code, such as #0a79b8, or leave it empty.', 'giftkit' ) );
 		}
 	}
 

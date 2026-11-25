@@ -1,5 +1,6 @@
 /**
- * GiftKit's "New Donation Form" page.
+ * GiftKit's admin pages: the "New Donation Form" page and a form's
+ * Donation tab.
  */
 ( function () {
 	'use strict';
@@ -13,6 +14,11 @@
 		};
 		toggle.addEventListener( 'change', sync );
 		sync();
+	}
+
+	// The accent color: WordPress's color picker, which can be left empty.
+	if ( window.jQuery && window.jQuery.fn.wpColorPicker ) {
+		window.jQuery( 'input.giftkit-color' ).wpColorPicker();
 	}
 
 	// Copy the embed shortcode.
