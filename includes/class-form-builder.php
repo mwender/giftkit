@@ -242,8 +242,12 @@ class Form_Builder {
 		$fee_line   = self::field( $form, 'fee-product' );
 		if ( $fee_choice ) {
 			/* translators: %s: fee percentage, e.g. 3% */
-			$label                  = sprintf( __( 'Add %s to your gift to cover our transaction costs?', 'giftkit' ), self::plain_number( $percent ) . '%' );
-			$fee_choice->choices    = array( array( 'text' => $label, 'value' => 'yes', 'isSelected' => false ) );
+			$label = sprintf( __( 'Add %s to your gift to cover our transaction costs?', 'giftkit' ), self::plain_number( $percent ) . '%' );
+			// On the form, the percentage is followed by the fee in money, which
+			// giftkit.js fills in as the amount changes: "Add 3% ($1.50) to…".
+			/* translators: %s: fee percentage, e.g. 3% */
+			$choice_text            = sprintf( __( 'Add %s to your gift to cover our transaction costs?', 'giftkit' ), self::plain_number( $percent ) . '%<span class="giftkit-fee-amount" data-percent="' . esc_attr( self::plain_number( $percent ) ) . '"></span>' );
+			$fee_choice->choices    = array( array( 'text' => $choice_text, 'value' => 'yes', 'isSelected' => false ) );
 			$fee_choice->inputs     = array( array( 'id' => $fee_choice->id . '.1', 'label' => $label, 'name' => '' ) );
 			$fee_choice->description = $settings['feeNote'];
 			$fee_choice->visibility = $percent > 0 ? 'visible' : 'administrative';

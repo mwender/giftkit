@@ -57,7 +57,7 @@
 		// Under the fee checkbox: the total with the fee, while it's ticked.
 		var $feeTotal = $form.find( '.giftkit-fee-total' );
 		if ( $fee.length && ! $feeTotal.length ) {
-			$feeTotal = $( '<p class="giftkit-fee-total" aria-live="polite" hidden></p>' ).appendTo( $fee.closest( '.giftkit-fee' ) );
+			$feeTotal = $( '<p class="giftkit-fee-total" aria-live="polite" aria-hidden="true"></p>' ).appendTo( $fee.closest( '.giftkit-fee' ) );
 		}
 		var code = strings.currencyCode || '';
 
@@ -96,10 +96,21 @@
 			$form.find( '.giftkit-summary-amount' ).text( formatAmount( total ) );
 			$form.find( '.giftkit-summary-frequency' ).text( monthly ? ( strings.eachMonth || '' ) : '' );
 
+			// Page 1: the fee in money, in the checkbox label: "Add 3% ($1.50)".
+			$form.find( '.giftkit-fee-amount' ).each( function () {
+				var gift = parseFloat( $amount.val() );
+				var percent = parseFloat( this.getAttribute( 'data-percent' ) );
+				var fee = gift > 0 && percent > 0 ? Math.round( gift * percent ) / 100 : 0;
+				var money = typeof window.gformFormatMoney === 'function' ? window.gformFormatMoney( fee, true ) : formatAmount( fee );
+				this.textContent = fee > 0 ? ' (' + money + ')' : '';
+			} );
+
 			// Page 1: the total with the fee, while the fee is ticked.
+			// Its space is always reserved, so nothing below it moves; it fades
+			// in and out (see giftkit.css).
 			if ( $feeTotal.length ) {
 				var showFeeTotal = $fee.is( ':checked' ) && typeof totals[ formId ] === 'number' && totals[ formId ] > 0;
-				$feeTotal.prop( 'hidden', ! showFeeTotal );
+				$feeTotal.toggleClass( 'is-visible', showFeeTotal ).attr( 'aria-hidden', showFeeTotal ? 'false' : 'true' );
 				if ( showFeeTotal ) {
 					// Always with cents, to match the total on the payment page.
 					var withFee = typeof window.gformFormatMoney === 'function' ? window.gformFormatMoney( totals[ formId ], true ) : formatAmount( totals[ formId ] );

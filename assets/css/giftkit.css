@@ -204,15 +204,31 @@
 	font-style: italic;
 }
 
-/* "Total with the fee", shown under the fee checkbox while it's ticked. */
+/*
+ * "Total with the fee", under the fee checkbox. Its line is always there,
+ * so ticking the box doesn't push anything down; the text fades in.
+ */
 .giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total {
+	min-height: 1.5em;
 	margin: 10px 0 0;
+	line-height: 1.5;
 	color: var(--giftkit-accent);
 	font-weight: 700;
+	opacity: 0;
+	transform: translateY(3px);
+	transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total[hidden] {
-	display: none;
+.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total.is-visible {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total {
+		transform: none;
+		transition: none;
+	}
 }
 
 .giftkit-form_wrapper.gform-theme--framework .giftkit-summary {
