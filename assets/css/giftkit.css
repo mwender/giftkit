@@ -204,6 +204,17 @@
 	font-style: italic;
 }
 
+/* "Total with the fee", shown under the fee checkbox while it's ticked. */
+.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total {
+	margin: 10px 0 0;
+	color: var(--giftkit-accent);
+	font-weight: 700;
+}
+
+.giftkit-form_wrapper.gform-theme--framework .giftkit-fee-total[hidden] {
+	display: none;
+}
+
 .giftkit-form_wrapper.gform-theme--framework .giftkit-summary {
 	font-size: 1.15rem;
 }

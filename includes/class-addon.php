@@ -421,6 +421,10 @@ class Addon extends GFAddOn {
 			'eachMonth'      => __( ' each month', 'giftkit' ),
 			/* translators: %s: currency code, e.g. USD */
 			'perMonth'       => __( '%s / month', 'giftkit' ),
+			/* translators: %s: total including the processing fee, e.g. $103.00 */
+			'feeTotal'        => __( 'Total with the fee: %s', 'giftkit' ),
+			/* translators: %s: monthly total including the processing fee, e.g. $103.00 */
+			'feeTotalMonthly' => __( 'Total with the fee: %s a month', 'giftkit' ),
 		);
 	}
 

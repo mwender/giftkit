@@ -52,6 +52,13 @@
 		var $presets = $form.find( '.giftkit-presets input[type=radio]' );
 		var $frequency = $form.find( '.giftkit-frequency input[type=radio]' );
 		var $total = $form.find( '.giftkit-total' );
+		var $fee = $form.find( '.giftkit-fee input[type=checkbox]' );
+
+		// Under the fee checkbox: the total with the fee, while it's ticked.
+		var $feeTotal = $form.find( '.giftkit-fee-total' );
+		if ( $fee.length && ! $feeTotal.length ) {
+			$feeTotal = $( '<p class="giftkit-fee-total" aria-live="polite" hidden></p>' ).appendTo( $fee.closest( '.giftkit-fee' ) );
+		}
 		var code = strings.currencyCode || '';
 
 		$form.find( '.giftkit-amount .ginput_container' )
@@ -88,6 +95,17 @@
 			var total = typeof totals[ formId ] === 'number' && totals[ formId ] > 0 ? totals[ formId ] : $amount.val();
 			$form.find( '.giftkit-summary-amount' ).text( formatAmount( total ) );
 			$form.find( '.giftkit-summary-frequency' ).text( monthly ? ( strings.eachMonth || '' ) : '' );
+
+			// Page 1: the total with the fee, while the fee is ticked.
+			if ( $feeTotal.length ) {
+				var showFeeTotal = $fee.is( ':checked' ) && typeof totals[ formId ] === 'number' && totals[ formId ] > 0;
+				$feeTotal.prop( 'hidden', ! showFeeTotal );
+				if ( showFeeTotal ) {
+					// Always with cents, to match the total on the payment page.
+					var withFee = typeof window.gformFormatMoney === 'function' ? window.gformFormatMoney( totals[ formId ], true ) : formatAmount( totals[ formId ] );
+					$feeTotal.text( ( monthly ? strings.feeTotalMonthly : strings.feeTotal ).replace( '%s', withFee ) );
+				}
+			}
 
 			// Page 3: say above the total whether it's charged once or monthly.
 			var $note = $total.find( '.giftkit-frequency-note' );
