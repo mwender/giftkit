@@ -1,6 +1,8 @@
 /**
  * Renders the WordPress.org assets in .wordpress-org/ from their sources:
  * the banners from bin/assets/banner.html, the PNG icons from icon.svg.
+ * Also renders the website's social image, site/assets/images/og-image.png,
+ * from bin/assets/og-image.html.
  *
  * Needs Playwright with Chromium: `npm install` in this repo, then
  * `npm run assets`. Set CHROMIUM_PATH to use an existing Chromium binary.
@@ -20,6 +22,15 @@ const out = ( file ) => path.join( root, '.wordpress-org', file );
 		await page.goto( 'file://' + path.join( __dirname, 'assets', 'banner.html' ) );
 		await page.waitForLoadState( 'networkidle' );
 		await page.screenshot( { path: out( scale === 1 ? 'banner-772x250.png' : 'banner-1544x500.png' ) } );
+		await page.close();
+	}
+
+	// Social sharing image for the website: 1200x630.
+	{
+		const page = await browser.newPage( { viewport: { width: 1200, height: 630 } } );
+		await page.goto( 'file://' + path.join( __dirname, 'assets', 'og-image.html' ) );
+		await page.waitForLoadState( 'networkidle' );
+		await page.screenshot( { path: path.join( root, 'site', 'assets', 'images', 'og-image.png' ) } );
 		await page.close();
 	}
 

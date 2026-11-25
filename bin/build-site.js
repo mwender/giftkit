@@ -21,6 +21,11 @@ const out = path.join( root, '_site' );
 const layout = fs.readFileSync( path.join( root, 'site', 'layout.html' ), 'utf8' );
 const repo = 'https://github.com/mwender/giftkit/blob/main/';
 
+// The site's own address, for links that must be absolute (canonical,
+// Open Graph). It comes from site/CNAME.
+const cnameFile = path.join( root, 'site', 'CNAME' );
+const siteUrl = fs.existsSync( cnameFile ) ? 'https://' + fs.readFileSync( cnameFile, 'utf8' ).trim() : 'https://mwender.github.io/giftkit';
+
 const fill = ( template, values ) => template.replace( /{{(\w+)}}/g, ( match, key ) => ( key in values ? values[ key ] : match ) );
 
 function write( file, html ) {
@@ -38,7 +43,18 @@ function page( file, values ) {
 	const depth = file.split( '/' ).length - 1;
 	const rootPath = depth ? '../'.repeat( depth ) : './';
 	const content = fill( values.content, { root: rootPath } );
-	write( file, fill( layout, { ...values, content, root: rootPath, docs_current: values.docs_current || '', scripts: values.scripts || '' } ) );
+	const url = siteUrl + '/' + file.replace( /index\.html$/, '' );
+	write( file, fill( layout, {
+		...values,
+		content,
+		root: rootPath,
+		url,
+		site_url: siteUrl,
+		og_title: values.og_title || values.title,
+		description: escape( values.description ),
+		docs_current: values.docs_current || '',
+		scripts: values.scripts || '',
+	} ) );
 }
 
 const escape = ( text ) => text.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( /"/g, '&quot;' );
@@ -63,7 +79,8 @@ copy( path.join( '.wordpress-org', 'icon.svg' ), path.join( 'assets', 'images', 
 // Landing page.
 page( 'index.html', {
 	title: 'GiftKit: a donation form for Gravity Forms',
-	description: 'GiftKit adds a ready-made donation form to Gravity Forms: one-time and monthly gifts, preset amounts, an optional processing fee and Stripe payments.',
+	og_title: 'GiftKit: Donation form? Already built.',
+	description: 'GiftKit adds a complete donation form to Gravity Forms: one-time and monthly gifts, preset amounts, an optional processing fee and Stripe payments.',
 	content: fs.readFileSync( path.join( root, 'site', 'index.html' ), 'utf8' ).replace( /^<!--.*?-->\n/, '' ),
 	scripts: '<script src="./assets/demo.js" defer></script>',
 } );
@@ -73,6 +90,13 @@ const docsDir = path.join( root, 'docs' );
 const docs = fs.readdirSync( docsDir ).filter( ( name ) => name.endsWith( '.md' ) ).sort( ( a, b ) => ( a === 'README.md' ? -1 : b === 'README.md' ? 1 : a.localeCompare( b ) ) );
 const titleOf = ( markdown ) => ( markdown.match( /^#\s+(.+)$/m ) || [ '', 'GiftKit' ] )[ 1 ].trim();
 const slugOf = ( name ) => ( name === 'README.md' ? '' : name.replace( /\.md$/, '' ) );
+
+// A page's description: its first paragraph after the title, as plain text.
+const descriptionOf = ( markdown ) => {
+	const paragraph = markdown.replace( /^#.*$/m, '' ).trim().split( /\n\s*\n/ )[ 0 ] || '';
+	const text = paragraph.replace( /\[([^\]]+)\]\([^)]*\)/g, '$1' ).replace( /[*_`]/g, '' ).replace( /\s+/g, ' ' ).trim();
+	return text.length > 160 ? text.slice( 0, 157 ).replace( /\s+\S*$/, '' ) + '…' : text;
+};
 
 for ( const name of docs ) {
 	const markdown = fs.readFileSync( path.join( docsDir, name ), 'utf8' );
@@ -94,7 +118,7 @@ for ( const name of docs ) {
 
 	page( here, {
 		title: `${ titleOf( markdown ) } · GiftKit docs`,
-		description: 'GiftKit documentation.',
+		description: descriptionOf( markdown ),
 		docs_current: ' aria-current="page"',
 		content: `<div class="docs">
 	<div class="wrap">

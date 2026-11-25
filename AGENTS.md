@@ -52,6 +52,7 @@ GiftKit's landing page and documentation are a static site at **https://giftkit.
 - `docs/*.md` is the documentation and the only copy of it: `npm run site` (`bin/build-site.js`) turns `docs/README.md` into `/docs/` and every other page into `/docs/<name>/`, rewriting links between `.md` files. URLs in the build are relative, so the site works at any address.
 - `.github/workflows/pages.yml` builds and publishes on pushes to `main` that touch the site or docs. The repository's Pages source must be set to GitHub Actions.
 - The plugin links into the site through `Addon::DOCS_URL` and `Admin_Page::HELP_URL`; change both if the address changes, and that change needs a plugin release.
+- Every page has a canonical link and Open Graph and Twitter card tags. The domain for their absolute URLs comes from `site/CNAME`. The share image, `site/assets/images/og-image.png` (1200×630), is rendered from `bin/assets/og-image.html` by `npm run assets` and committed, since the Pages build has no browser. A docs page's description is its first paragraph.
 - Design direction: the hero is a working sample of the form's choices; everything else stays quiet. Coral `#D23A40` (buttons and selections; the brighter `#E5484D` is the mark only), navy `#1D2140` text, slate `#5B6178` secondary text, `#F6F7FB` background. The WordPress.org banner (`bin/assets/banner.html`) uses the same palette and fonts.
 
 To preview locally: `npm run site`, then serve `_site/` (for example `python3 -m http.server -d _site`).
