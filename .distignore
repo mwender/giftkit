@@ -12,3 +12,5 @@ README.md
 package.json
 package-lock.json
 /docs
+/site
+/_site

@@ -44,6 +44,18 @@ GiftKit follows the same setup as `mwender/localdev-switcher`, which is already 
 - **The first submission** is a manual upload of the zip at https://wordpress.org/plugins/developers/add/. SVN access, and so the workflows, follow approval.
 - A release bumps the version in three places: `giftkit.php` (header and `GIFTKIT_VERSION`), `readme.txt` (`Stable tag` and the changelog), then `npm run readme`.
 
+## The website
+
+GiftKit's landing page and documentation are a static site published to GitHub Pages (`https://mwender.github.io/giftkit/`, until a custom domain is attached through `site/CNAME`).
+
+- `site/index.html` is the landing page, `site/layout.html` the shared page frame, `site/assets/` the stylesheet, the hero demo's script and the self-hosted fonts (Bricolage Grotesque and Source Sans 3, with their OFL licences).
+- `docs/*.md` is the documentation and the only copy of it: `npm run site` (`bin/build-site.js`) turns `docs/README.md` into `/docs/` and every other page into `/docs/<name>/`, rewriting links between `.md` files. URLs in the build are relative, so the site works at any address.
+- `.github/workflows/pages.yml` builds and publishes on pushes to `main` that touch the site or docs. The repository's Pages source must be set to GitHub Actions.
+- The plugin links into the site through `Addon::DOCS_URL` and `Admin_Page::HELP_URL`; change both if the address changes, and that change needs a plugin release.
+- Design direction: the hero is a working sample of the form's choices; everything else stays quiet. Coral `#D23A40` (buttons and selections; the brighter `#E5484D` is the mark only), navy `#1D2140` text, slate `#5B6178` secondary text, `#F6F7FB` background. The WordPress.org banner (`bin/assets/banner.html`) uses the same palette and fonts.
+
+To preview locally: `npm run site`, then serve `_site/` (for example `python3 -m http.server -d _site`).
+
 ## Working conventions
 
 - Commit on a branch and open a pull request for anything beyond small fixes; `main` is what sites install from GitHub.

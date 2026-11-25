@@ -29,7 +29,7 @@ class Admin_Page {
 	/**
 	 * Where to read about GiftKit.
 	 */
-	const HELP_URL = 'https://github.com/mwender/giftkit/tree/main/docs';
+	const HELP_URL = 'https://mwender.github.io/giftkit/docs/';
 
 	/**
 	 * URL of this page.

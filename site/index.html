@@ -1,0 +1,108 @@
+<!-- Landing page body. bin/build-site.js wraps it in site/layout.html. -->
+<section class="hero">
+	<div class="wrap">
+		<div>
+			<h1>A donation form for Gravity Forms, ready in one step.</h1>
+			<p class="lede">One-time and monthly gifts, preset amounts, an optional processing fee and Stripe payments. GiftKit builds the whole form and its Stripe feeds, then gives you one settings tab for what you'll actually change.</p>
+			<div class="actions">
+				<span class="button button--soon">Coming soon to WordPress.org</span>
+				<a class="button button--primary" href="{{root}}docs/">Read the docs</a>
+				<p class="code-link">Free and open source. <a href="https://github.com/mwender/giftkit">See the code on GitHub</a>.</p>
+			</div>
+		</div>
+
+		<div class="demo">
+			<form class="demo-card" data-demo aria-label="Sample donation form">
+				<fieldset class="demo-frequency">
+					<legend>Gift type</legend>
+					<label class="demo-choice"><input type="radio" name="frequency" value="one-time" checked><span>One time</span></label>
+					<label class="demo-choice"><input type="radio" name="frequency" value="monthly"><span>Monthly</span></label>
+				</fieldset>
+
+				<fieldset class="demo-amounts">
+					<legend>Amount</legend>
+					<label class="demo-choice"><input type="radio" name="amount" value="25"><span>$25</span></label>
+					<label class="demo-choice"><input type="radio" name="amount" value="50" checked><span>$50</span></label>
+					<label class="demo-choice"><input type="radio" name="amount" value="100"><span>$100</span></label>
+					<label class="demo-choice"><input type="radio" name="amount" value="250"><span>$250</span></label>
+				</fieldset>
+
+				<label class="demo-fee">
+					<input type="checkbox" name="fee" value="3">
+					<span>Add 3% to your gift to cover our transaction costs?</span>
+				</label>
+
+				<div class="demo-total">
+					<p class="demo-frequency-note" data-demo-note>One-time gift</p>
+					<p class="demo-sum"><output data-demo-total aria-live="polite">$50</output><span data-demo-unit>USD</span></p>
+				</div>
+			</form>
+			<p class="demo-caption">A working sample of the choices donors make. Pick an amount, switch to monthly, add the fee.</p>
+		</div>
+	</div>
+</section>
+
+<section class="section">
+	<div class="wrap split">
+		<div>
+			<h2>Everything you'll change, on one tab</h2>
+			<p class="intro">Each GiftKit form gets a Donation tab in its Gravity Forms settings. The rest of the setup is done for you.</p>
+		</div>
+		<dl class="settings">
+			<div><dt>Preset amounts</dt><dd>The amount buttons donors choose from, in the order you list them.</dd></div>
+			<div><dt>Another amount</dt><dd>Let donors type in their own.</dd></div>
+			<div><dt>Minimum gift</dt><dd>Turns away tiny gifts, which also keeps out bots testing stolen cards.</dd></div>
+			<div><dt>Monthly gifts</dt><dd>Offer them or not, and name them as donors will see them in Stripe.</dd></div>
+			<div><dt>Processing fee</dt><dd>The percentage donors can add to their gift, and a note on why it helps.</dd></div>
+			<div><dt>Manage-your-gift link</dt><dd>Monthly donors update their card or cancel through Stripe, without contacting you. <a href="{{root}}docs/stripe-customer-portal/">Set it up</a></dd></div>
+			<div><dt>Thank-you message</dt><dd>What donors read after they give.</dd></div>
+		</dl>
+	</div>
+</section>
+
+<section class="section">
+	<div class="wrap">
+		<h2>Three short pages for donors</h2>
+		<ol class="steps">
+			<li>
+				<img src="{{root}}assets/images/step-1.svg" alt="Page 1: one-time or monthly, amount buttons, a note and the amount." width="220" height="260" loading="lazy">
+				<h3>The gift</h3>
+				<p>One-time or monthly, a preset amount or their own, and an optional note.</p>
+			</li>
+			<li>
+				<img src="{{root}}assets/images/step-2.svg" alt="Page 2: name, email, phone, billing address and a summary of the gift." width="220" height="260" loading="lazy">
+				<h3>The donor</h3>
+				<p>Name, email, phone and billing address, with a summary of their gift and a way back to change it.</p>
+			</li>
+			<li>
+				<img src="{{root}}assets/images/step-3.svg" alt="Page 3: card payment, the processing fee option and the total." width="220" height="260" loading="lazy">
+				<h3>Payment</h3>
+				<p>Card payment through Stripe, the option to cover the fee, and a total that says whether it's charged once or every month.</p>
+			</li>
+		</ol>
+	</div>
+</section>
+
+<section class="section">
+	<div class="wrap split">
+		<h2>An ordinary Gravity Forms form underneath</h2>
+		<div class="prose-block">
+			<p>GiftKit builds the form you'd otherwise assemble by hand: three pages, the pricing fields, conditional logic, a one-time and a monthly Stripe feed, a thank-you message and an admin notification.</p>
+			<p>Entries, notifications and your other add-ons work as they always have. Edit any field you like: GiftKit finds the ones it manages by their role, not their position, so its settings keep working.</p>
+		</div>
+	</div>
+</section>
+
+<section class="section">
+	<div class="wrap split">
+		<h2>What you need</h2>
+		<div>
+			<ul class="requirements">
+				<li><a href="https://www.gravityforms.com/">Gravity Forms</a> 2.9 or later</li>
+				<li>The Gravity Forms Stripe Add-On, connected to your Stripe account</li>
+				<li>WordPress 6.5 or later, and PHP 8.1 or later</li>
+			</ul>
+			<p class="intro">GiftKit isn't affiliated with or endorsed by Gravity Forms or Stripe.</p>
+		</div>
+	</div>
+</section>

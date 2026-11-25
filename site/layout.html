@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<link rel="icon" href="{{root}}assets/images/icon.svg" type="image/svg+xml">
+<link rel="preload" href="{{root}}assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}assets/site.css">
+</head>
+<body>
+<header class="site-header">
+	<div class="wrap">
+		<a class="brand" href="{{root}}"><img src="{{root}}assets/images/icon.svg" alt="" width="36" height="36">GiftKit</a>
+		<nav class="site-nav" aria-label="Site">
+			<a href="{{root}}docs/"{{docs_current}}>Docs</a>
+			<a href="https://github.com/mwender/giftkit">GitHub</a>
+		</nav>
+	</div>
+</header>
+<main id="main">
+{{content}}
+</main>
+<footer class="site-footer">
+	<div class="wrap">
+		<p>GiftKit for Gravity Forms is free software, licensed under the GPL.</p>
+		<p>Made by <a href="https://mwender.com/">Michael Wender</a>.</p>
+	</div>
+</footer>
+{{scripts}}
+</body>
+</html>

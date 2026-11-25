@@ -7,10 +7,12 @@
   "scripts": {
     "readme": "wp-readme-to-md --screenshot-url='.wordpress-org/{screenshot}.png' && node bin/readme-banner.js",
     "assets": "node bin/render-assets.js",
-    "zip": "bin/build-zip.sh"
+    "zip": "bin/build-zip.sh",
+    "site": "node bin/build-site.js"
   },
   "devDependencies": {
     "playwright": "1.59.1",
-    "wp-readme-to-markdown": "^1.0.1"
+    "wp-readme-to-markdown": "^1.0.1",
+    "marked": "^15.0.0"
   }
 }

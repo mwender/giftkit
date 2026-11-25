@@ -30,9 +30,9 @@ class Addon extends GFAddOn {
 	protected $_capabilities_form_settings = 'gravityforms_edit_forms';
 
 	/**
-	 * Where GiftKit's documentation lives.
+	 * Where GiftKit's documentation lives (the website built from docs/).
 	 */
-	const DOCS_URL = 'https://github.com/mwender/giftkit/blob/main/docs/';
+	const DOCS_URL = 'https://mwender.github.io/giftkit/docs/';
 
 	/**
 	 * @var Addon|null
@@ -533,7 +533,7 @@ class Addon extends GFAddOn {
 					'description'         => sprintf(
 						/* translators: %s: link to the setup instructions */
 						esc_html__( 'Your Stripe customer portal login link. Monthly donors see it in the thank-you message, with their email filled in, so they can update their card or cancel without contacting you. %s', 'giftkit' ),
-						'<a href="' . esc_url( self::DOCS_URL . 'stripe-customer-portal.md' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get this link', 'giftkit' ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'giftkit' ) . '</span></a>'
+						'<a href="' . esc_url( self::DOCS_URL . 'stripe-customer-portal/' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get this link', 'giftkit' ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'giftkit' ) . '</span></a>'
 					),
 					'dependency'          => array( 'field' => 'offerMonthly', 'values' => array( '1' ) ),
 					'validation_callback' => array( $this, 'validate_url' ),
