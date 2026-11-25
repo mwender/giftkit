@@ -4,6 +4,7 @@
  *   /                        site/index.html
  *   /docs/                   docs/README.md
  *   /docs/<name>/            docs/<name>.md
+ *   /changelog/              the Changelog section of readme.txt
  *
  * The markdown in docs/ stays the only copy of the documentation; links
  * between .md files are rewritten to the site's pages. Every URL is
@@ -53,6 +54,7 @@ function page( file, values ) {
 		og_title: values.og_title || values.title,
 		description: escape( values.description ),
 		docs_current: values.docs_current || '',
+		changelog_current: values.changelog_current || '',
 		scripts: values.scripts || '',
 	} ) );
 }
@@ -134,6 +136,42 @@ for ( const name of docs ) {
 		</nav>
 		<article class="article">
 ${ body }
+		</article>
+	</div>
+</div>`,
+	} );
+}
+
+// Changelog, from readme.txt, so there's one copy. Versions newer than the
+// readme's Stable tag haven't been released yet, and are marked as such.
+{
+	const readme = fs.readFileSync( path.join( root, 'readme.txt' ), 'utf8' );
+	const stable = ( readme.match( /^Stable tag:\s*(\S+)/m ) || [] )[ 1 ] || '0';
+	const newer = ( a, b ) => {
+		const pa = a.split( '.' ).map( Number );
+		const pb = b.split( '.' ).map( Number );
+		for ( let i = 0; i < Math.max( pa.length, pb.length ); i++ ) {
+			if ( ( pa[ i ] || 0 ) !== ( pb[ i ] || 0 ) ) {
+				return ( pa[ i ] || 0 ) > ( pb[ i ] || 0 );
+			}
+		}
+		return false;
+	};
+	const section = ( readme.split( /^== Changelog ==\s*$/m )[ 1 ] || '' ).split( /^== /m )[ 0 ];
+	const markdown = section
+		.replace( /^= (.+?) =\s*$/gm, ( m, version ) => `## ${ version }${ newer( version, stable ) ? ' (upcoming)' : '' }` )
+		.replace( /^\* (New|Improved|Fixed):/gm, '* **$1:**' );
+
+	page( 'changelog/index.html', {
+		title: 'Changelog · GiftKit',
+		description: 'What has changed in each version of GiftKit for Gravity Forms.',
+		changelog_current: ' aria-current="page"',
+		content: `<div class="docs docs--single">
+	<div class="wrap">
+		<article class="article">
+<h1>Changelog</h1>
+<p>What's changed in each version of GiftKit. Versions marked upcoming are finished but not released yet.</p>
+${ marked.parse( markdown ) }
 		</article>
 	</div>
 </div>`,

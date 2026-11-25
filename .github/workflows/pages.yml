@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'readme.txt'
       - 'site/**'
       - 'assets/images/**'
       - '.wordpress-org/icon.svg'

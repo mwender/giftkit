@@ -541,6 +541,15 @@ p { margin: 0; }
 
 .article blockquote p:last-child { margin-bottom: 0; }
 
+/* A docs-style page without the sidebar (the changelog). */
+.docs--single .wrap {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.docs--single .article {
+	margin-inline: auto;
+}
+
 /* Small screens */
 
 @media (max-width: 960px) {
@@ -556,6 +565,8 @@ p { margin: 0; }
 
 @media (max-width: 720px) {
 	:root { --gutter: 16px; }
+
+	.site-nav { gap: 14px; }
 
 	body { font-size: 1.0625rem; }
 
