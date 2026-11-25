@@ -264,24 +264,46 @@
 }
 
 /*
- * "Powered by GiftKit", shown only when the site owner turns it on. It sits
- * after the form's wrapper, so it's styled on its own.
+ * "Powered by GiftKit", shown only when the site owner turns it on: a small
+ * version of the mark and wordmark from giftkit.org. It sits after the
+ * form's wrapper, so it's styled on its own, in the site's own font.
  */
 .giftkit-credit {
 	margin: 18px 0 0;
 	font-size: 0.85rem;
-	line-height: 1.4;
+	line-height: 1;
 	text-align: left;
-	opacity: 0.75;
 }
 
 .giftkit-credit a {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 	color: inherit;
-	text-decoration: underline;
-	text-underline-offset: 0.18em;
+	text-decoration: none;
+	opacity: 0.7;
+	transition: opacity 0.15s;
 }
 
 .giftkit-credit a:hover,
 .giftkit-credit a:focus-visible {
 	opacity: 1;
+}
+
+.giftkit-credit__mark {
+	display: block;
+	width: 18px;
+	height: 18px;
+	border-radius: 5px;
+}
+
+.giftkit-credit__name {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.giftkit-credit a {
+		transition: none;
+	}
 }

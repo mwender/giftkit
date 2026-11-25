@@ -228,10 +228,16 @@ class Addon extends GFAddOn {
 			return $html;
 		}
 
+		// A small version of the GiftKit mark and wordmark.
+		$lockup = sprintf(
+			'<img class="giftkit-credit__mark" src="%1$s" alt="" width="18" height="18"><span class="giftkit-credit__name">GiftKit</span>',
+			esc_url( plugins_url( 'assets/images/giftkit-mark.svg', GIFTKIT_FILE ) )
+		);
+
 		return $html . sprintf(
 			'<p class="giftkit-credit"><a href="%1$s" target="_blank" rel="noopener">%2$s</a></p>',
 			esc_url( self::SITE_URL ),
-			esc_html__( 'Powered by GiftKit', 'giftkit' )
+			'<span class="giftkit-credit__label">' . esc_html__( 'Powered by', 'giftkit' ) . '</span>' . $lockup
 		);
 	}
 
