@@ -30,6 +30,11 @@ class Addon extends GFAddOn {
 	protected $_capabilities_form_settings = 'gravityforms_edit_forms';
 
 	/**
+	 * Where GiftKit's documentation lives.
+	 */
+	const DOCS_URL = 'https://github.com/mwender/giftkit/blob/main/docs/';
+
+	/**
 	 * @var Addon|null
 	 */
 	private static $_instance = null;
@@ -76,6 +81,8 @@ class Addon extends GFAddOn {
 		parent::init();
 		add_filter( 'gform_pre_render', array( $this, 'add_form_class' ) );
 		add_filter( 'gform_field_css_class', array( $this, 'add_field_class' ), 10, 3 );
+		add_filter( 'gform_replace_merge_tags', array( $this, 'replace_manage_gift_tag' ), 10, 7 );
+		add_filter( 'gform_custom_merge_tags', array( $this, 'add_manage_gift_tag' ), 10, 4 );
 	}
 
 	/**
@@ -123,6 +130,101 @@ class Addon extends GFAddOn {
 		}
 
 		return $classes;
+	}
+
+	/**
+	 * Fills in {giftkit_manage_gift_link}: a link to the Stripe customer
+	 * portal, with the donor's email filled in, for monthly gifts only.
+	 *
+	 * @param string $text       Text containing merge tags.
+	 * @param array  $form       The form.
+	 * @param array  $entry      The entry.
+	 * @param bool   $url_encode Whether to URL-encode values.
+	 * @param bool   $esc_html   Whether to escape HTML.
+	 * @param bool   $nl2br      Whether to convert new lines.
+	 * @param string $format     "html" or "text".
+	 *
+	 * @return string
+	 */
+	public function replace_manage_gift_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+		if ( false === strpos( (string) $text, Form_Builder::MANAGE_GIFT_TAG ) ) {
+			return $text;
+		}
+
+		$link = self::manage_gift_link( $form, $entry, $format );
+
+		// In HTML the link is its own paragraph, so take the blank lines before
+		// the tag with it (GF may already have turned them into <br>s). With
+		// no link, that leaves nothing behind.
+		if ( '' === $link || 'text' !== $format ) {
+			$text = preg_replace( '/(?:\s|<br\s*\/?>)*' . preg_quote( Form_Builder::MANAGE_GIFT_TAG, '/' ) . '/i', Form_Builder::MANAGE_GIFT_TAG, $text );
+		}
+
+		return str_replace( Form_Builder::MANAGE_GIFT_TAG, $link, $text );
+	}
+
+	/**
+	 * The manage-gift link for an entry, or '' when it doesn't apply.
+	 *
+	 * @param array  $form   The form.
+	 * @param array  $entry  The entry.
+	 * @param string $format "html" or "text".
+	 *
+	 * @return string
+	 */
+	public static function manage_gift_link( $form, $entry, $format = 'html' ) {
+		$portal    = (string) rgars( $form, 'giftkit/portalUrl' );
+		$frequency = Form_Builder::field( $form, 'frequency' );
+		if ( '' === $portal || ! $frequency || ! is_array( $entry ) || Form_Builder::MONTHLY !== rgar( $entry, (string) $frequency->id ) ) {
+			return '';
+		}
+
+		$email = Form_Builder::field( $form, 'email' );
+		$email = $email ? (string) rgar( $entry, (string) $email->id ) : '';
+		if ( is_email( $email ) ) {
+			$portal = add_query_arg( 'prefilled_email', rawurlencode( $email ), $portal );
+		}
+
+		if ( 'text' === $format ) {
+			/* translators: %s: link to the Stripe customer portal */
+			return sprintf( __( 'To update your card or cancel your monthly gift at any time, visit %s', 'giftkit' ), esc_url_raw( $portal ) );
+		}
+
+		$link = sprintf(
+			/* translators: 1: link to the Stripe customer portal, 2: its text */
+			__( 'To update your card or cancel your monthly gift at any time, <a href="%1$s">%2$s</a>.', 'giftkit' ),
+			esc_url( $portal ),
+			esc_html__( 'manage your monthly gift', 'giftkit' )
+		);
+
+		/**
+		 * Filters the "manage your monthly gift" paragraph shown to monthly donors.
+		 *
+		 * @param string $html   The paragraph.
+		 * @param string $portal The portal URL, with the donor's email.
+		 * @param array  $form   The form.
+		 * @param array  $entry  The entry.
+		 */
+		return apply_filters( 'giftkit_manage_gift_link_html', '<p class="giftkit-manage-gift">' . wp_kses( $link, array( 'a' => array( 'href' => array() ) ) ) . '</p>', $portal, $form, $entry );
+	}
+
+	/**
+	 * Lists {giftkit_manage_gift_link} in the merge tag menu on GiftKit forms.
+	 *
+	 * @param array $tags    Custom merge tags.
+	 * @param int   $form_id Form ID.
+	 *
+	 * @return array
+	 */
+	public function add_manage_gift_tag( $tags, $form_id ) {
+		if ( Form_Builder::is_giftkit_form( GFFormsModel::get_form_meta( $form_id ) ) ) {
+			$tags[] = array(
+				'label' => __( 'Manage monthly gift link', 'giftkit' ),
+				'tag'   => Form_Builder::MANAGE_GIFT_TAG,
+			);
+		}
+
+		return $tags;
 	}
 
 	/**
@@ -345,6 +447,11 @@ class Addon extends GFAddOn {
 			$settings['presets'] = Form_Builder::presets_to_string( Form_Builder::parse_presets( $settings['presets'] ) );
 		}
 
+		// With a portal link set, make sure the thank-you message shows it.
+		if ( ! empty( $settings['portalUrl'] ) && isset( $settings['confirmationMessage'] ) && false === strpos( $settings['confirmationMessage'], Form_Builder::MANAGE_GIFT_TAG ) ) {
+			$settings['confirmationMessage'] = rtrim( $settings['confirmationMessage'] ) . "\n\n" . Form_Builder::MANAGE_GIFT_TAG;
+		}
+
 		if ( ! parent::save_form_settings( $form, $settings ) ) {
 			return false;
 		}
@@ -415,6 +522,21 @@ class Addon extends GFAddOn {
 					'class'       => 'large',
 					'description' => esc_html__( 'Shown to donors at checkout and in your Stripe dashboard.', 'giftkit' ),
 					'dependency'  => array( 'field' => 'offerMonthly', 'values' => array( '1' ) ),
+				),
+				array(
+					'name'                => 'portalUrl',
+					'label'               => esc_html__( 'Manage-your-gift link', 'giftkit' ),
+					'type'                => 'text',
+					'input_type'          => 'url',
+					'class'               => 'large',
+					'placeholder'         => 'https://billing.stripe.com/p/login/…',
+					'description'         => sprintf(
+						/* translators: %s: link to the setup instructions */
+						esc_html__( 'Your Stripe customer portal login link. Monthly donors see it in the thank-you message, with their email filled in, so they can update their card or cancel without contacting you. %s', 'giftkit' ),
+						'<a href="' . esc_url( self::DOCS_URL . 'stripe-customer-portal.md' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get this link', 'giftkit' ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'giftkit' ) . '</span></a>'
+					),
+					'dependency'          => array( 'field' => 'offerMonthly', 'values' => array( '1' ) ),
+					'validation_callback' => array( $this, 'validate_url' ),
 				),
 			),
 		);
@@ -488,6 +610,18 @@ class Addon extends GFAddOn {
 	public function validate_presets( $field, $value ) {
 		if ( ! Form_Builder::parse_presets( $value ) ) {
 			$field->set_error( esc_html__( 'Enter at least one amount, such as 25, 50, 100.', 'giftkit' ) );
+		}
+	}
+
+	/**
+	 * The value must be empty or an https URL.
+	 *
+	 * @param \Gravity_Forms\Gravity_Forms\Settings\Fields\Base $field The setting.
+	 * @param string                                             $value Its value.
+	 */
+	public function validate_url( $field, $value ) {
+		if ( '' !== trim( (string) $value ) && ( 'https' !== wp_parse_url( $value, PHP_URL_SCHEME ) || ! wp_http_validate_url( $value ) ) ) {
+			$field->set_error( esc_html__( 'Enter a full link starting with https://, as Stripe shows it.', 'giftkit' ) );
 		}
 	}
 

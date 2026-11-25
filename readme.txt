@@ -72,6 +72,10 @@ Put the Stripe Add-On in test mode and use Stripe's test card numbers. The New D
 
 Yes. Turn off "Offer monthly gifts" on the Donation tab, or set the fee percentage to 0.
 
+= Can monthly donors update their card or cancel on their own? =
+
+Yes. Turn on Stripe's no-code customer portal link in your Stripe Dashboard, then paste it into "Manage-your-gift link" on the Donation tab. Monthly donors then see a "manage your monthly gift" link in the thank-you message, with their email filled in. Step-by-step instructions: https://github.com/mwender/giftkit/blob/main/docs/stripe-customer-portal.md
+
 = Which currencies work? =
 
 Whichever currency Gravity Forms is set to. Amounts and totals use its symbol and formatting.

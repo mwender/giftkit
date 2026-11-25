@@ -34,6 +34,11 @@ class Form_Builder {
 	const MONTHLY  = 'monthly';
 
 	/**
+	 * Merge tag for the "manage your monthly gift" link.
+	 */
+	const MANAGE_GIFT_TAG = '{giftkit_manage_gift_link}';
+
+	/**
 	 * Default settings for a new form.
 	 *
 	 * @return array
@@ -48,6 +53,7 @@ class Form_Builder {
 			'feeNote'             => __( 'Covering the card processing fee means more of your gift goes to our mission.', 'giftkit' ),
 			/* translators: %s: site name */
 			'subscriptionName'    => sprintf( __( 'Monthly donation to %s', 'giftkit' ), get_bloginfo( 'name' ) ),
+			'portalUrl'           => '',
 			'confirmationMessage' => __( 'Thank you for your gift!', 'giftkit' ),
 		);
 	}
@@ -67,13 +73,15 @@ class Form_Builder {
 			return self::default_settings()['confirmationMessage'];
 		}
 
+		// The manage-gift tag shows nothing until a portal link is set, and
+		// then only for monthly gifts.
 		return sprintf(
 			/* translators: 1: donor's first name, 2: gift total, 3: donor's email (all merge tags) */
 			__( 'Thank you, %1$s! Your gift of %2$s was received. A receipt is on its way to %3$s.', 'giftkit' ),
 			'{' . $name->label . ' (First):' . $name->id . '.3}',
 			'{' . $total->label . ':' . $total->id . '}',
 			'{' . $email->label . ':' . $email->id . '}'
-		);
+		) . "\n\n" . self::MANAGE_GIFT_TAG;
 	}
 
 	/**
