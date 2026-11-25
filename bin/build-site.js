@@ -87,7 +87,11 @@ page( 'index.html', {
 
 // Docs.
 const docsDir = path.join( root, 'docs' );
-const docs = fs.readdirSync( docsDir ).filter( ( name ) => name.endsWith( '.md' ) ).sort( ( a, b ) => ( a === 'README.md' ? -1 : b === 'README.md' ? 1 : a.localeCompare( b ) ) );
+// Sidebar order: the overview, then these in reading order, then any other
+// page alphabetically.
+const docsOrder = [ 'README.md', 'getting-started.md', 'donation-settings.md', 'stripe-customer-portal.md' ];
+const rank = ( name ) => ( docsOrder.includes( name ) ? docsOrder.indexOf( name ) : docsOrder.length );
+const docs = fs.readdirSync( docsDir ).filter( ( name ) => name.endsWith( '.md' ) ).sort( ( a, b ) => rank( a ) - rank( b ) || a.localeCompare( b ) );
 const titleOf = ( markdown ) => ( markdown.match( /^#\s+(.+)$/m ) || [ '', 'GiftKit' ] )[ 1 ].trim();
 const slugOf = ( name ) => ( name === 'README.md' ? '' : name.replace( /\.md$/, '' ) );
 
