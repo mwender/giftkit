@@ -52,6 +52,8 @@ class Form_Builder {
 			'feePercent'          => '3',
 			'feeNote'             => __( 'Covering the card processing fee means more of your gift goes to our mission.', 'giftkit' ),
 			/* translators: %s: site name */
+			'oneTimeName'         => sprintf( __( 'Donation to %s', 'giftkit' ), get_bloginfo( 'name' ) ),
+			/* translators: %s: site name */
 			'subscriptionName'    => sprintf( __( 'Monthly donation to %s', 'giftkit' ), get_bloginfo( 'name' ) ),
 			'portalUrl'           => '',
 			// Off unless the site owner turns it on (WordPress.org guideline 10).

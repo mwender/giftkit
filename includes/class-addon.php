@@ -89,6 +89,7 @@ class Addon extends GFAddOn {
 		add_filter( 'gform_replace_merge_tags', array( $this, 'replace_manage_gift_tag' ), 10, 7 );
 		add_filter( 'gform_custom_merge_tags', array( $this, 'add_manage_gift_tag' ), 10, 4 );
 		add_filter( 'gform_get_form_filter', array( $this, 'add_credit' ), 10, 2 );
+		add_filter( 'gform_stripe_charge_description', array( $this, 'one_time_description' ), 10, 5 );
 	}
 
 	/**
@@ -226,6 +227,59 @@ class Addon extends GFAddOn {
 		 * @param array  $entry  The entry.
 		 */
 		return apply_filters( 'giftkit_manage_gift_link_html', '<p class="giftkit-manage-gift">' . wp_kses( $link, array( 'a' => array( 'href' => array() ) ) ) . '</p>', $portal, $form, $entry );
+	}
+
+	/**
+	 * Describes a one-time gift in Stripe, in place of the Stripe Add-On's
+	 * "Entry ID: …, Products: …", e.g. "Donation to The Maker City: $25.00
+	 * gift + $0.75 to cover fees (entry 6244)".
+	 *
+	 * @param string $description     The Stripe Add-On's description.
+	 * @param array  $strings         Its parts.
+	 * @param array  $entry           The entry.
+	 * @param array  $submission_data Payment data, including line items.
+	 * @param array  $feed            The Stripe feed.
+	 *
+	 * @return string
+	 */
+	public function one_time_description( $description, $strings, $entry, $submission_data, $feed ) {
+		if ( 'product' !== rgars( $feed, 'meta/transactionType' ) ) {
+			return $description;
+		}
+
+		$form = GFAPI::get_form( rgar( $entry, 'form_id' ) ?: rgar( $feed, 'form_id' ) );
+		if ( ! Form_Builder::is_giftkit_form( $form ) ) {
+			return $description;
+		}
+
+		$amounts = array( 'gift-product' => 0, 'fee-product' => 0 );
+		foreach ( $amounts as $role => $amount ) {
+			$field = Form_Builder::field( $form, $role );
+			foreach ( (array) rgar( $submission_data, 'line_items' ) as $item ) {
+				if ( $field && (int) rgar( $item, 'id' ) === (int) $field->id ) {
+					$amounts[ $role ] += (float) rgar( $item, 'unit_price' ) * max( 1, (int) rgar( $item, 'quantity' ) );
+				}
+			}
+		}
+
+		$currency = rgar( $entry, 'currency' ) ?: GFCommon::get_currency();
+		$name     = (string) rgars( $form, 'giftkit/oneTimeName' );
+		if ( '' === $name ) {
+			$name = Form_Builder::default_settings()['oneTimeName'];
+		}
+
+		$text = $amounts['fee-product'] > 0
+			/* translators: 1: one-time gift name, 2: gift amount, 3: fee amount */
+			? sprintf( __( '%1$s: %2$s gift + %3$s to cover fees', 'giftkit' ), $name, GFCommon::to_money( $amounts['gift-product'], $currency ), GFCommon::to_money( $amounts['fee-product'], $currency ) )
+			/* translators: 1: one-time gift name, 2: gift amount */
+			: sprintf( __( '%1$s: %2$s gift', 'giftkit' ), $name, GFCommon::to_money( $amounts['gift-product'], $currency ) );
+
+		if ( rgar( $entry, 'id' ) ) {
+			/* translators: %d: Gravity Forms entry ID */
+			$text .= ' ' . sprintf( __( '(entry %d)', 'giftkit' ), $entry['id'] );
+		}
+
+		return html_entity_decode( $text, ENT_QUOTES );
 	}
 
 	/**
@@ -580,6 +634,13 @@ class Addon extends GFAddOn {
 					'name'  => 'offerMonthly',
 					'label' => esc_html__( 'Offer monthly gifts', 'giftkit' ),
 					'type'  => 'toggle',
+				),
+				array(
+					'name'        => 'oneTimeName',
+					'label'       => esc_html__( 'One-time gift name', 'giftkit' ),
+					'type'        => 'text',
+					'class'       => 'large',
+					'description' => esc_html__( 'Shown in your Stripe dashboard for one-time gifts, with the gift, any processing fee and the entry number.', 'giftkit' ),
 				),
 				array(
 					'name'        => 'subscriptionName',
