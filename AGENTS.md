@@ -19,6 +19,7 @@ It's built by Michael Wender (Wenmark Digital Solutions). The repo is public at 
 
 - `giftkit.php` registers the add-on on `gform_loaded`.
 - `includes/class-form-builder.php` defines the form and keeps it in step with its settings. Each field GiftKit manages carries a `giftkitRole` property (`frequency`, `presets`, `amount`, `fee`, `total` and so on). Settings, feeds and front-end code find fields **by role**, never by field ID or CSS class, so the form survives someone reordering or adding fields.
+- **Nothing on the payment page may change a price.** The Stripe Add-On's payment field watches the form's products and rebuilds itself whenever a price changes, which clears the card details a donor has typed. That's why the "cover the fee" checkbox sits on page 1 under the amount, and `Form_Builder::apply_settings()` moves it there on older forms.
 - Settings live in the form object under `$form['giftkit']` (the add-on framework's per-form settings), along with the two Stripe feed IDs.
 - Pricing is native GF: two calculation products (the gift, and the fee shown only when the donor opts in) read the amount field, and the Stripe feeds charge the Form Total. One feed handles one-time gifts and the other monthly subscriptions, chosen by the Gift Type field's value (`one-time` / `monthly`), so its labels can be reworded freely.
 

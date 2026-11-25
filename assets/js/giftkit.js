@@ -18,6 +18,20 @@
 
 	var strings = window.giftkit_strings || {};
 
+	// Each form's latest total, from Gravity Forms, and the function that
+	// refreshes its summary.
+	var totals = {};
+	var summaries = {};
+	if ( window.gform && typeof window.gform.addFilter === 'function' ) {
+		window.gform.addFilter( 'gform_product_total', function ( total, formId ) {
+			totals[ formId ] = total;
+			if ( summaries[ formId ] ) {
+				summaries[ formId ]();
+			}
+			return total;
+		}, 50 );
+	}
+
 	function formatAmount( value ) {
 		var number = parseFloat( value );
 		if ( isNaN( number ) ) {
@@ -70,7 +84,9 @@
 		function updateSummary() {
 			var monthly = isMonthly();
 
-			$form.find( '.giftkit-summary-amount' ).text( formatAmount( $amount.val() ) );
+			// The total includes the processing fee when the donor added it.
+			var total = typeof totals[ formId ] === 'number' && totals[ formId ] > 0 ? totals[ formId ] : $amount.val();
+			$form.find( '.giftkit-summary-amount' ).text( formatAmount( total ) );
 			$form.find( '.giftkit-summary-frequency' ).text( monthly ? ( strings.eachMonth || '' ) : '' );
 
 			// Page 3: say above the total whether it's charged once or monthly.
@@ -108,6 +124,7 @@
 			$form.trigger( 'submit', [ true ] );
 		} );
 
+		summaries[ formId ] = updateSummary;
 		syncPresetToAmount();
 		updateSummary();
 	}

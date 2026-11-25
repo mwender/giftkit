@@ -24,7 +24,7 @@ The form's shortcode, with a **Copy** button. Paste it into any page, or use the
 
 ## Processing fee
 
-**Fee percentage.** Donors can choose to add this percentage to their gift to cover your card processing costs. The checkbox on the form says "Add 3% to your gift to cover our transaction costs?" (with your percentage). Set it to 0 to hide the option.
+**Fee percentage.** Donors can choose to add this percentage to their gift to cover your card processing costs. The checkbox sits on the form's first page, under the amount, and says "Add 3% to your gift to cover our transaction costs?" (with your percentage). Set it to 0 to hide the option.
 
 **Note below the fee option.** A short line under the checkbox explaining why covering the fee helps.
 

@@ -251,6 +251,21 @@ class Form_Builder {
 		if ( $fee_line && $amount ) {
 			$fee_line->calculationFormula = sprintf( '{%s:%d} * %s', $amount->label, $amount->id, self::plain_number( $percent / 100 ) );
 		}
+		// The fee only counts when the donor ticks the box.
+		if ( $fee_line && $fee_choice ) {
+			$fee_line->conditionalLogic = array(
+				'actionType' => 'show',
+				'logicType'  => 'all',
+				'rules'      => array( array( 'fieldId' => (string) $fee_choice->id, 'operator' => 'is', 'value' => 'yes' ) ),
+			);
+		}
+
+		// The fee checkbox belongs on the amount's page, right under it. On
+		// the payment page, any price change makes the Stripe Add-On rebuild
+		// its payment field and clear the card details a donor has typed.
+		if ( $fee_choice && $amount ) {
+			$form = self::place_after( $form, $fee_choice, $amount );
+		}
 
 		// Thank-you message, kept in the default confirmation.
 		foreach ( ( rgar( $form, 'confirmations' ) ?: array() ) as $id => $confirmation ) {
@@ -344,6 +359,31 @@ class Form_Builder {
 			'message'           => implode( "\n", $message ),
 			'disableAutoformat' => true,
 		);
+	}
+
+	/**
+	 * Moves a field to directly after another, on the same page.
+	 *
+	 * @param array     $form  The form.
+	 * @param \GF_Field $field The field to move.
+	 * @param \GF_Field $after The field it should follow.
+	 *
+	 * @return array
+	 */
+	private static function place_after( $form, $field, $after ) {
+		$fields = array_values( array_filter( $form['fields'], function ( $f ) use ( $field ) {
+			return (int) $f->id !== (int) $field->id;
+		} ) );
+		foreach ( $fields as $index => $f ) {
+			if ( (int) $f->id === (int) $after->id ) {
+				$field->pageNumber = $after->pageNumber;
+				array_splice( $fields, $index + 1, 0, array( $field ) );
+				$form['fields'] = $fields;
+				break;
+			}
+		}
+
+		return $form;
 	}
 
 	/**
@@ -573,6 +613,14 @@ class Form_Builder {
 				'numberFormat' => 'decimal_dot',
 				'placeholder'  => '0',
 			),
+			array(
+				'type'           => 'checkbox',
+				'role'           => 'fee',
+				'label'          => __( 'Cover Transaction Costs', 'giftkit' ),
+				'labelPlacement' => 'hidden_label',
+				'choices'        => array(),
+				'inputs'         => array(),
+			),
 			// Page 2: the donor.
 			array( 'type' => 'page', 'role' => 'page-2' ),
 			array(
@@ -684,14 +732,6 @@ class Form_Builder {
 					array( 'id' => '.4', 'label' => __( 'Card Type', 'giftkit' ) ),
 					array( 'id' => '.5', 'label' => __( 'Cardholder Name', 'giftkit' ), 'isHidden' => true ),
 				),
-			),
-			array(
-				'type'           => 'checkbox',
-				'role'           => 'fee',
-				'label'          => __( 'Cover Transaction Costs', 'giftkit' ),
-				'labelPlacement' => 'hidden_label',
-				'choices'        => array(),
-				'inputs'         => array(),
 			),
 			array(
 				'type'                => 'product',

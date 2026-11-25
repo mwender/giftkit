@@ -95,14 +95,14 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 ### 2. The Donation settings tab: amounts, monthly gifts, the processing fee and the thank-you message. ###
 ![The Donation settings tab: amounts, monthly gifts, the processing fee and the thank-you message.](.wordpress-org/screenshot-2.png)
 
-### 3. Page 1 of the form: one-time or monthly, preset amounts, and a note. ###
-![Page 1 of the form: one-time or monthly, preset amounts, and a note.](.wordpress-org/screenshot-3.png)
+### 3. Page 1 of the form: one-time or monthly, preset amounts, a note, and the option to cover the processing fee. ###
+![Page 1 of the form: one-time or monthly, preset amounts, a note, and the option to cover the processing fee.](.wordpress-org/screenshot-3.png)
 
 ### 4. Page 2: the donor's details, with a summary of their gift. ###
 ![Page 2: the donor's details, with a summary of their gift.](.wordpress-org/screenshot-4.png)
 
-### 5. Page 3: card payment through Stripe, the optional processing fee, and a total that says whether it's charged once or monthly. ###
-![Page 3: card payment through Stripe, the optional processing fee, and a total that says whether it's charged once or monthly.](.wordpress-org/screenshot-5.png)
+### 5. Page 3: card payment through Stripe, and a total that says whether it's charged once or monthly. ###
+![Page 3: card payment through Stripe, and a total that says whether it's charged once or monthly.](.wordpress-org/screenshot-5.png)
 
 
 ## Changelog ##

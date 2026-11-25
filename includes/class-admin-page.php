@@ -203,7 +203,7 @@ class Admin_Page {
 			array(
 				'image' => 'step-1.svg',
 				'title' => __( '1. The gift', 'giftkit' ),
-				'text'  => __( 'One-time or monthly, preset amount buttons or another amount, and an optional note.', 'giftkit' ),
+				'text'  => __( 'One-time or monthly, preset amount buttons or another amount, an optional note, and the option to cover the processing fee.', 'giftkit' ),
 			),
 			array(
 				'image' => 'step-2.svg',
@@ -213,7 +213,7 @@ class Admin_Page {
 			array(
 				'image' => 'step-3.svg',
 				'title' => __( '3. Payment', 'giftkit' ),
-				'text'  => __( 'Card payment through Stripe, an option to cover the processing fee, and the total.', 'giftkit' ),
+				'text'  => __( 'Card payment through Stripe, and a total that says whether it\'s charged once or every month.', 'giftkit' ),
 			),
 		);
 
