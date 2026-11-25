@@ -16,6 +16,23 @@
 		sync();
 	}
 
+	// The monthly gift settings appear only while "Offer monthly gifts" is
+	// on, and follow the toggle as it's switched.
+	var monthlyToggle = document.querySelector( 'input[name="_gform_setting_offerMonthly"]' );
+	if ( monthlyToggle ) {
+		var monthlyFields = [ 'subscriptionName', 'portalUrl' ].map( function ( name ) {
+			var input = document.querySelector( '[name="_gform_setting_' + name + '"]' );
+			return input ? input.closest( '.gform-settings-field' ) : null;
+		} ).filter( Boolean );
+		var syncMonthly = function () {
+			monthlyFields.forEach( function ( field ) {
+				field.style.display = monthlyToggle.checked ? '' : 'none';
+			} );
+		};
+		monthlyToggle.addEventListener( 'change', syncMonthly );
+		syncMonthly();
+	}
+
 	// The accent color: WordPress's color picker, which can be left empty.
 	if ( window.jQuery && window.jQuery.fn.wpColorPicker ) {
 		window.jQuery( 'input.giftkit-color' ).wpColorPicker();

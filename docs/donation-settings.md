@@ -14,9 +14,9 @@ The form's shortcode, with a **Copy** button. Paste it into any page, or use the
 
 **Minimum gift.** Gifts below this are refused, including amounts typed in by donors. A minimum also discourages bots that test stolen cards with tiny amounts. Leave it empty for no minimum.
 
-**Offer monthly gifts.** Turns the **One time / Monthly** choice on or off. When it's off, every gift is a one-time gift, and **Monthly gift name** and **Manage-your-gift link** are hidden.
-
 **One-time gift name.** How one-time gifts are described in your Stripe Dashboard, for example "Donation to The Maker City". Stripe shows it with the gift amount, any processing fee and the entry number: "Donation to The Maker City: $25.00 gift + $0.75 to cover fees (entry 6244)".
+
+**Offer monthly gifts.** Turns the **One time / Monthly** choice on or off. When it's off, every gift is a one-time gift, and **Monthly gift name** and **Manage-your-gift link** are hidden.
 
 **Monthly gift name.** The name of monthly gifts, shown to donors at checkout and in your Stripe Dashboard.
 

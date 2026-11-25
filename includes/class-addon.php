@@ -631,11 +631,6 @@ class Addon extends GFAddOn {
 					'validation_callback' => array( $this, 'validate_non_negative' ),
 				),
 				array(
-					'name'  => 'offerMonthly',
-					'label' => esc_html__( 'Offer monthly gifts', 'giftkit' ),
-					'type'  => 'toggle',
-				),
-				array(
 					'name'        => 'oneTimeName',
 					'label'       => esc_html__( 'One-time gift name', 'giftkit' ),
 					'type'        => 'text',
@@ -643,12 +638,16 @@ class Addon extends GFAddOn {
 					'description' => esc_html__( 'Shown in your Stripe dashboard for one-time gifts, with the gift, any processing fee and the entry number.', 'giftkit' ),
 				),
 				array(
+					'name'  => 'offerMonthly',
+					'label' => esc_html__( 'Offer monthly gifts', 'giftkit' ),
+					'type'  => 'toggle',
+				),
+				array(
 					'name'        => 'subscriptionName',
 					'label'       => esc_html__( 'Monthly gift name', 'giftkit' ),
 					'type'        => 'text',
 					'class'       => 'large',
 					'description' => esc_html__( 'Shown to donors at checkout and in your Stripe dashboard.', 'giftkit' ),
-					'dependency'  => array( 'field' => 'offerMonthly', 'values' => array( '1' ) ),
 				),
 				array(
 					'name'                => 'portalUrl',
@@ -662,7 +661,6 @@ class Addon extends GFAddOn {
 						esc_html__( 'Your Stripe customer portal login link. Monthly donors see it in the thank-you message, with their email filled in, so they can update their card or cancel without contacting you. %s', 'giftkit' ),
 						'<a href="' . esc_url( self::DOCS_URL . 'stripe-customer-portal/' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get this link', 'giftkit' ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'giftkit' ) . '</span></a>'
 					),
-					'dependency'          => array( 'field' => 'offerMonthly', 'values' => array( '1' ) ),
 					'validation_callback' => array( $this, 'validate_url' ),
 				),
 			),
