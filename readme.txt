@@ -4,7 +4,7 @@ Tags: donations, donation form, gravity forms, stripe, nonprofit
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 License: GPL2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,13 +82,14 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 2. The Donation settings tab: amounts, monthly gifts, the processing fee and the thank-you message.
 3. Page 1 of the form: one-time or monthly, preset amounts, and a note.
 4. Page 2: the donor's details, with a summary of their gift.
+5. Page 3: card payment through Stripe, the optional processing fee, and a total that says whether it's charged once or monthly.
 
 == Changelog ==
 
-= 0.1.0 =
+= 1.0.0 =
 * Initial release.
 
 == Upgrade Notice ==
 
-= 0.1.0 =
+= 1.0.0 =
 Initial release.

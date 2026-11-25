@@ -6,7 +6,7 @@
 **Requires at least:** 6.5  
 **Tested up to:** 7.1  
 **Requires PHP:** 8.1  
-**Stable tag:** 0.1.0  
+**Stable tag:** 1.0.0  
 **License:** GPL2+  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -92,13 +92,16 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 ### 4. Page 2: the donor's details, with a summary of their gift. ###
 ![Page 2: the donor's details, with a summary of their gift.](.wordpress-org/screenshot-4.png)
 
+### 5. Page 3: card payment through Stripe, the optional processing fee, and a total that says whether it's charged once or monthly. ###
+![Page 3: card payment through Stripe, the optional processing fee, and a total that says whether it's charged once or monthly.](.wordpress-org/screenshot-5.png)
+
 
 ## Changelog ##
 
-### 0.1.0 ###
+### 1.0.0 ###
 * Initial release.
 
 ## Upgrade Notice ##
 
-### 0.1.0 ###
+### 1.0.0 ###
 Initial release.

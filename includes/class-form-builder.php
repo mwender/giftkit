@@ -384,7 +384,8 @@ class Form_Builder {
 		}
 		foreach ( array( 'note' => $note, 'phone' => $phone, 'business_name' => $business ) as $key => $field ) {
 			if ( $field ) {
-				$shared['metaData'][] = array( 'key' => $key, 'custom_key' => '', 'value' => (string) $field->id );
+				// The Stripe add-on names each metadata entry by custom_key.
+				$shared['metaData'][] = array( 'key' => 'gf_custom', 'custom_key' => $key, 'value' => (string) $field->id );
 			}
 		}
 
@@ -661,6 +662,11 @@ class Form_Builder {
 					'rules'      => array( array( 'fieldId' => (string) $ids[ $role ], 'operator' => 'is', 'value' => $value ) ),
 				);
 				unset( $field['showIf'] );
+			}
+			// The card field's "Link email field" setting, as the form editor
+			// sets it. (Stripe Add-On 7.0 reads it only in the editor.)
+			if ( 'card' === $field[ self::ROLE ] ) {
+				$field['linkEmailFieldId'] = (string) $ids['email'];
 			}
 			if ( 'gift-product' === $field[ self::ROLE ] ) {
 				$field['calculationFormula'] = sprintf( '{%s:%d}', __( 'Gift Amount', 'giftkit' ), $ids['amount'] );
