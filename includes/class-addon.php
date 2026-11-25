@@ -32,7 +32,7 @@ class Addon extends GFAddOn {
 	/**
 	 * Where GiftKit's documentation lives (the website built from docs/).
 	 */
-	const DOCS_URL = 'https://mwender.github.io/giftkit/docs/';
+	const DOCS_URL = 'https://giftkit.org/docs/';
 
 	/**
 	 * @var Addon|null

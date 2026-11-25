@@ -46,7 +46,7 @@ GiftKit follows the same setup as `mwender/localdev-switcher`, which is already 
 
 ## The website
 
-GiftKit's landing page and documentation are a static site published to GitHub Pages (`https://mwender.github.io/giftkit/`, until a custom domain is attached through `site/CNAME`).
+GiftKit's landing page and documentation are a static site at **https://giftkit.org**, published with GitHub Pages. The domain is registered in Michael's Cloudflare account, with DNS-only CNAME records for `giftkit.org` and `www` pointing at `mwender.github.io`; the custom domain is set in the repository's Pages settings, and `site/CNAME` records it.
 
 - `site/index.html` is the landing page, `site/layout.html` the shared page frame, `site/assets/` the stylesheet, the hero demo's script and the self-hosted fonts (Bricolage Grotesque and Source Sans 3, with their OFL licences).
 - `docs/*.md` is the documentation and the only copy of it: `npm run site` (`bin/build-site.js`) turns `docs/README.md` into `/docs/` and every other page into `/docs/<name>/`, rewriting links between `.md` files. URLs in the build are relative, so the site works at any address.

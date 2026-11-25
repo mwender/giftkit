@@ -74,7 +74,7 @@ Yes. Turn off "Offer monthly gifts" on the Donation tab, or set the fee percenta
 
 = Can monthly donors update their card or cancel on their own? =
 
-Yes. Turn on Stripe's no-code customer portal link in your Stripe Dashboard, then paste it into "Manage-your-gift link" on the Donation tab. Monthly donors then see a "manage your monthly gift" link in the thank-you message, with their email filled in. Step-by-step instructions: https://mwender.github.io/giftkit/docs/stripe-customer-portal/
+Yes. Turn on Stripe's no-code customer portal link in your Stripe Dashboard, then paste it into "Manage-your-gift link" on the Donation tab. Monthly donors then see a "manage your monthly gift" link in the thank-you message, with their email filled in. Step-by-step instructions: https://giftkit.org/docs/stripe-customer-portal/
 
 = Which currencies work? =
 

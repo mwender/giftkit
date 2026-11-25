@@ -1,9 +1,9 @@
 /* GiftKit site. Built by bin/build-site.js into _site/. */
 
 @font-face {
-	font-family: "Bricolage Grotesque";
-	src: url("fonts/bricolage-grotesque.woff2") format("woff2");
-	font-weight: 400 800;
+	font-family: "Familjen Grotesk";
+	src: url("fonts/familjen-grotesk.woff2") format("woff2");
+	font-weight: 400 700;
 	font-display: swap;
 }
 
@@ -33,7 +33,7 @@
 	--tile: #eceef4;
 	--line: #dcdfea;
 
-	--display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+	--display: "Familjen Grotesk", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
 	--text: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
 
 	--page: 1160px;
@@ -99,8 +99,8 @@ p { margin: 0; }
 	gap: 10px;
 	font-family: var(--display);
 	font-size: 1.45rem;
-	font-weight: 750;
-	letter-spacing: -0.02em;
+	font-weight: 700;
+	letter-spacing: -0.01em;
 	text-decoration: none;
 }
 
@@ -135,9 +135,9 @@ p { margin: 0; }
 
 .hero h1 {
 	font-size: clamp(2.6rem, 2.6vw + 1.6rem, 4.3rem);
-	font-weight: 760;
-	line-height: 0.98;
-	letter-spacing: -0.03em;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.02em;
 	max-width: 12ch;
 }
 
