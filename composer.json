@@ -1,0 +1,17 @@
+{
+  "name": "mwender/giftkit",
+  "description": "A ready-made donation form for Gravity Forms, with one-time and monthly gifts, preset amounts, an optional processing fee and Stripe payments.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Michael Wender",
+      "homepage": "https://mwender.com/"
+    }
+  ],
+  "homepage": "https://github.com/mwender/giftkit",
+  "require": {
+    "php": ">=8.1",
+    "composer/installers": "^1.0 || ^2.0"
+  }
+}
