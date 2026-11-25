@@ -107,10 +107,26 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 
 ## Changelog ##
 
+### 1.1.0 ###
+* New: Monthly donors can update their card or cancel on their own, through Stripe's customer portal. Paste your portal link into "Manage-your-gift link" and it appears in the thank-you message with the donor's email filled in. It's also available as the {giftkit_manage_gift_link} merge tag.
+* New: A thank-you email for every donor, with a summary of their gift. Turn it on or off with "Email donors a thank-you", and edit it like any Gravity Forms notification.
+* New: "Button and accent color", so the form matches your site without a styles attribute on the shortcode.
+* New: The form's shortcode, with a Copy button, at the top of the Donation tab.
+* New: "One-time gift name". One-time gifts are described in your Stripe Dashboard with the gift, any processing fee and the entry number.
+* New: An optional "Powered by GiftKit" credit below the form. It's off unless you turn it on.
+* Improved: The "cover the fee" checkbox is now on the first page, under the amount, and shows the fee in money as the amount changes. Once it's ticked, the total with the fee appears beneath it.
+* Improved: The gift summary on the second page includes the processing fee.
+* Improved: "Offer monthly gifts" sits directly above the monthly settings, which now show and hide as it's switched.
+* Fixed: Ticking the fee checkbox on the payment page cleared the card details the donor had typed.
+* Documentation at https://giftkit.org/docs/, linked from the plugin.
+
 ### 1.0.0 ###
 * Initial release.
 
 ## Upgrade Notice ##
+
+### 1.1.0 ###
+After updating, open each donation form's Donation tab and click Save Settings. That moves the fee checkbox to the first page and adds the donor thank-you email.
 
 ### 1.0.0 ###
 Initial release.
