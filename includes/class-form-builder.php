@@ -465,7 +465,8 @@ class Form_Builder {
 	 * @param array $form     The form.
 	 * @param array $settings GiftKit settings, including the feed IDs.
 	 *
-	 * @return array Keyed by feed ID: `name`, `meta` and `active`.
+	 * @return array Keyed by feed ID: `name`, `meta`, `active`, and
+	 *               `changed`, the settings that differ.
 	 */
 	private static function feed_changes( $form, $settings ) {
 		if ( ! function_exists( 'gf_stripe' ) ) {
@@ -481,20 +482,26 @@ class Form_Builder {
 			}
 
 			$meta    = $feed['meta'];
-			$changed = (bool) $feed['is_active'] !== $definition['active'];
+			$changed = array();
+			if ( (bool) $feed['is_active'] !== $definition['active'] ) {
+				$changed[] = 'active';
+			}
 			foreach ( array( 'subscription_name', 'feed_condition_conditional_logic', 'feed_condition_conditional_logic_object' ) as $setting ) {
 				if ( isset( $definition['meta'][ $setting ] ) ) {
 					// Loose: stored values can come back as strings.
-					$changed          = $changed || rgar( $meta, $setting ) != $definition['meta'][ $setting ]; // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+					if ( rgar( $meta, $setting ) != $definition['meta'][ $setting ] ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+						$changed[] = $setting;
+					}
 					$meta[ $setting ] = $definition['meta'][ $setting ];
 				}
 			}
 
 			if ( $changed ) {
 				$changes[ $feed_id ] = array(
-					'name'   => rgar( $feed['meta'], 'feedName' ),
-					'meta'   => $meta,
-					'active' => $definition['active'],
+					'name'    => rgar( $feed['meta'], 'feedName' ),
+					'meta'    => $meta,
+					'active'  => $definition['active'],
+					'changed' => $changed,
 				);
 			}
 		}
@@ -525,14 +532,18 @@ class Form_Builder {
 	 * Saving the Donation tab rewrites the fields, email, confirmation and
 	 * feed settings GiftKit manages. They differ from what a save would
 	 * write when the form predates a GiftKit update, or when one of them was
-	 * edited by hand.
+	 * edited by hand. Each difference is described in a sentence saying what
+	 * saving will do, so a site owner can tell an update from the undoing of
+	 * their own edit.
 	 *
 	 * @param array $form     The form.
 	 * @param array $settings GiftKit settings, including the feed IDs.
 	 *
-	 * @return string[] What would change, one name each.
+	 * @return string[] What would change, one sentence each.
 	 */
 	public static function pending_changes( $form, $settings ) {
+		$settings = wp_parse_args( $settings, self::default_settings() );
+
 		// apply_settings() changes field objects in place, so give it copies.
 		$copy           = $form;
 		$copy['fields'] = array_map(
@@ -546,35 +557,142 @@ class Form_Builder {
 		$changes = array();
 		$before  = self::field_data( $form );
 		$after   = self::field_data( $updated );
-		foreach ( $after as $id => $data ) {
-			// Loose: Gravity Forms stores some numbers as strings.
-			if ( ! isset( $before[ $id ] ) || $before[ $id ] != $data ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
-				/* translators: %s: field label */
-				$changes[] = sprintf( __( 'Field: %s', 'giftkit' ), $data['label'] );
-			}
-		}
-		if ( array_keys( $before ) !== array_keys( $after ) ) {
-			$changes[] = __( 'Field order', 'giftkit' );
-		}
 
-		foreach ( array( 'notifications', 'confirmations' ) as $key ) {
-			$was = rgar( $form, $key ) ?: array();
-			foreach ( ( rgar( $updated, $key ) ?: array() ) as $id => $item ) {
-				if ( ! isset( $was[ $id ] ) ) {
-					/* translators: %s: notification name */
-					$changes[] = sprintf( __( 'Email: %s (added)', 'giftkit' ), rgar( $item, 'name' ) );
-				} elseif ( $was[ $id ] != $item ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
-					$changes[] = 'notifications' === $key
-						/* translators: %s: notification name */
-						? sprintf( __( 'Email: %s', 'giftkit' ), rgar( $item, 'name' ) )
-						: __( 'Thank-you message', 'giftkit' );
+		// The only field GiftKit moves is the fee checkbox.
+		$moved = array_keys( $before ) !== array_keys( $after );
+		foreach ( $after as $id => $data ) {
+			$was = isset( $before[ $id ] ) ? $before[ $id ] : array();
+			$differs = array();
+			foreach ( $data as $property => $value ) {
+				// Loose: Gravity Forms stores some numbers as strings.
+				if ( ! array_key_exists( $property, $was ) || $was[ $property ] != $value ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+					$differs[] = $property;
 				}
 			}
+			if ( 'fee' === rgar( $data, self::ROLE ) && in_array( 'pageNumber', $differs, true ) ) {
+				$moved = true;
+			}
+			$differs = array_diff( $differs, array( 'pageNumber' ) );
+			if ( $differs ) {
+				$changes = array_merge( $changes, self::describe_field_change( $data, $was, $differs, $settings ) );
+			}
+		}
+		if ( $moved ) {
+			array_unshift( $changes, __( 'Move the "cover the fee" checkbox to the first page, right under the gift amount. Ticking it on the payment page cleared the card details the donor had typed.', 'giftkit' ) );
+		}
+
+		$was = rgar( $form, 'notifications' ) ?: array();
+		foreach ( ( rgar( $updated, 'notifications' ) ?: array() ) as $id => $notification ) {
+			if ( ! isset( $was[ $id ] ) ) {
+				$changes[] = __( 'Add the donor thank-you email, because "Email donors a thank-you" is on. Donors get it after each gift, and you can edit it under Notifications.', 'giftkit' );
+			} elseif ( $was[ $id ] != $notification ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+				$changes[] = rgar( $notification, 'isActive' )
+					? __( 'Turn the donor thank-you email on, to match "Email donors a thank-you".', 'giftkit' )
+					: __( 'Turn the donor thank-you email off, to match "Email donors a thank-you".', 'giftkit' );
+			}
+		}
+
+		if ( rgar( $form, 'confirmations' ) != rgar( $updated, 'confirmations' ) ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+			$changes[] = __( 'Replace the thank-you message with the one under "Thank-you message".', 'giftkit' );
 		}
 
 		foreach ( self::feed_changes( $updated, $settings ) as $change ) {
-			/* translators: %s: Stripe feed name */
-			$changes[] = sprintf( __( 'Stripe feed: %s', 'giftkit' ), $change['name'] );
+			$name = $change['name'];
+			if ( in_array( 'active', $change['changed'], true ) ) {
+				$changes[] = $change['active']
+					/* translators: %s: Stripe feed name */
+					? sprintf( __( 'Switch the "%s" Stripe feed back on. Without it, those gifts can\'t be charged.', 'giftkit' ), $name )
+					/* translators: %s: Stripe feed name */
+					: sprintf( __( 'Switch the "%s" Stripe feed off, because "Offer monthly gifts" is off.', 'giftkit' ), $name );
+			}
+			if ( in_array( 'subscription_name', $change['changed'], true ) ) {
+				/* translators: 1: Stripe feed name, 2: monthly gift name */
+				$changes[] = sprintf( __( 'Set the subscription name on the "%1$s" Stripe feed to "%2$s", from "Monthly gift name".', 'giftkit' ), $name, $change['meta']['subscription_name'] );
+			}
+			// A feed being switched off needs no word about its condition.
+			if ( $change['active'] && array_intersect( array( 'feed_condition_conditional_logic', 'feed_condition_conditional_logic_object' ), $change['changed'] ) ) {
+				$changes[] = '1' === (string) rgar( $change['meta'], 'feed_condition_conditional_logic' )
+					/* translators: %s: Stripe feed name */
+					? sprintf( __( 'Restore the condition on the "%s" Stripe feed that picks it by gift type, one-time or monthly.', 'giftkit' ), $name )
+					/* translators: %s: Stripe feed name */
+					: sprintf( __( 'Make the "%s" Stripe feed charge every gift, because "Offer monthly gifts" is off.', 'giftkit' ), $name );
+			}
+		}
+
+		return $changes;
+	}
+
+	/**
+	 * Sentences for the properties of one field that saving would change.
+	 *
+	 * @param array    $data     The field as saving would leave it.
+	 * @param array    $was      The field as stored.
+	 * @param string[] $differs  The properties that differ.
+	 * @param array    $settings GiftKit settings.
+	 *
+	 * @return string[]
+	 */
+	private static function describe_field_change( $data, $was, $differs, $settings ) {
+		$changes = array();
+		$role    = rgar( $data, self::ROLE );
+		$has     = function ( ...$properties ) use ( &$differs ) {
+			$found   = array_intersect( $properties, $differs );
+			$differs = array_diff( $differs, $properties );
+			return (bool) $found;
+		};
+		// The checkbox's wording with the fee filled in, as giftkit.js does.
+		$example = function ( $field_data ) use ( $settings ) {
+			$fee = self::money( 50 * (float) GFCommon::to_number( $settings['feePercent'] ) / 100 );
+			$filled = preg_replace_callback(
+				'#<span class="giftkit-fee-amount"[^>]*></span>#',
+				function () use ( $fee ) {
+					return ' (' . $fee . ')';
+				},
+				(string) rgars( $field_data, 'choices/0/text' )
+			);
+			return trim( wp_strip_all_tags( $filled ) );
+		};
+		$text = function ( $field_data ) {
+			return trim( wp_strip_all_tags( (string) rgars( $field_data, 'choices/0/text' ) ) );
+		};
+
+		if ( 'fee' === $role ) {
+			if ( $has( 'choices', 'inputs' ) ) {
+				$changes[] = $text( $was ) === $text( $data )
+					/* translators: 1: example gift, e.g. $50.00, 2: the checkbox's wording for it */
+					? sprintf( __( 'Show the fee in money in the "cover the fee" checkbox, following the amount the donor picks. For a %1$s gift: "%2$s"', 'giftkit' ), self::money( 50 ), $example( $data ) )
+					/* translators: 1: current wording, 2: new wording */
+					: sprintf( __( 'Change the "cover the fee" checkbox\'s wording from "%1$s" to "%2$s", which follows "Fee percentage".', 'giftkit' ), $text( $was ), $text( $data ) );
+			}
+			if ( $has( 'description' ) ) {
+				$changes[] = __( 'Replace the note under the "cover the fee" checkbox with the one under "Note below the fee option".', 'giftkit' );
+			}
+			if ( $has( 'visibility' ) ) {
+				$changes[] = 'visible' === rgar( $data, 'visibility' )
+					? __( 'Show the "cover the fee" checkbox, because "Fee percentage" is above 0.', 'giftkit' )
+					: __( 'Hide the "cover the fee" checkbox, because "Fee percentage" is 0.', 'giftkit' );
+			}
+		} elseif ( 'fee-product' === $role && $has( 'calculationFormula', 'conditionalLogic' ) ) {
+			/* translators: %s: fee percentage, e.g. 3% */
+			$changes[] = sprintf( __( 'Set the processing fee to %s of the gift, from "Fee percentage", added only when the donor ticks the box.', 'giftkit' ), self::plain_number( $settings['feePercent'] ) . '%' );
+		} elseif ( 'presets' === $role && $has( 'choices' ) ) {
+			/* translators: %s: list of amounts */
+			$changes[] = sprintf( __( 'Set the amount buttons to %s, from "Preset amounts".', 'giftkit' ), implode( ', ', wp_list_pluck( rgar( $data, 'choices' ) ?: array(), 'text' ) ) );
+		} elseif ( 'amount' === $role && $has( 'rangeMin', 'errorMessage' ) ) {
+			$changes[] = '' !== (string) rgar( $data, 'rangeMin' )
+				/* translators: %s: minimum gift */
+				? sprintf( __( 'Refuse gifts under %s, from "Minimum gift".', 'giftkit' ), self::money( $data['rangeMin'] ) )
+				: __( 'Accept a gift of any amount, because "Minimum gift" is 0.', 'giftkit' );
+		} elseif ( 'frequency' === $role && $has( 'visibility' ) ) {
+			$changes[] = 'visible' === rgar( $data, 'visibility' )
+				? __( 'Show the one-time or monthly choice, because "Offer monthly gifts" is on.', 'giftkit' )
+				: __( 'Hide the one-time or monthly choice, because "Offer monthly gifts" is off.', 'giftkit' );
+		}
+
+		// Anything not described above.
+		if ( $differs ) {
+			/* translators: %s: field label */
+			$changes[] = sprintf( __( 'Reset the "%s" field to GiftKit\'s setup.', 'giftkit' ), rgar( $data, 'label' ) );
 		}
 
 		return $changes;

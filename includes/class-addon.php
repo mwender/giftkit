@@ -626,10 +626,10 @@ class Addon extends GFAddOn {
 	private static function changes_html( $changes ) {
 		$items = '';
 		foreach ( $changes as $change ) {
-			$items .= '<li>' . esc_html( $change ) . '</li>';
+			$items .= '<li style="list-style:disc;">' . esc_html( $change ) . '</li>';
 		}
 
-		return '<ul class="giftkit-changes">' . $items . '</ul>';
+		return '<ul class="giftkit-changes" style="list-style:disc;margin:0.25em 0 0.75em 1.5em;">' . $items . '</ul>';
 	}
 
 	/**
@@ -652,7 +652,7 @@ class Addon extends GFAddOn {
 					'name' => 'giftkitUpdates',
 					'type' => 'html',
 					'html' => function () use ( $form_id ) {
-						return '<p>' . esc_html__( 'GiftKit manages the parts of this form listed below, and they differ from what it would set up now. That happens after a GiftKit update, or when one of them was changed by hand. Save Settings brings them up to date:', 'giftkit' ) . '</p>'
+						return '<p>' . esc_html__( 'Some parts of this form that GiftKit manages don\'t match what it would set up now, usually because GiftKit was updated or something was changed in the form editor. Save Settings will:', 'giftkit' ) . '</p>'
 							. self::changes_html( $this->pending_changes( $form_id ) )
 							. '<p>' . esc_html__( 'Changes made to these parts in the form editor will be replaced. Fields you\'ve added yourself are never touched.', 'giftkit' ) . '</p>';
 					},
@@ -725,11 +725,11 @@ class Addon extends GFAddOn {
 					echo esc_html( sprintf( _n( '%d donation form has updates waiting.', '%d donation forms have updates waiting.', $count, 'giftkit' ), $count ) );
 					?>
 				</strong>
-				<?php esc_html_e( 'The parts of these forms that GiftKit manages differ from what it would set up now, after a GiftKit update or a change made by hand. Update them all here, or save each form\'s Donation tab.', 'giftkit' ); ?>
+				<?php esc_html_e( 'Some parts of these forms that GiftKit manages don\'t match what it would set up now, usually because GiftKit was updated or something was changed in the form editor. Update all makes these changes, as saving each form\'s Donation tab would:', 'giftkit' ); ?>
 			</p>
-			<ul style="list-style:disc;margin-left:2em;">
+			<ul style="margin-left:1em;">
 				<?php foreach ( $forms as $form_id => $form ) : ?>
-					<li><a href="<?php echo esc_url( self::settings_url( $form_id ) ); ?>"><?php echo esc_html( $form['title'] ); ?></a>: <?php echo esc_html( implode( '; ', $form['changes'] ) ); ?></li>
+					<li><a href="<?php echo esc_url( self::settings_url( $form_id ) ); ?>"><?php echo esc_html( $form['title'] ); ?></a><?php echo self::changes_html( $form['changes'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in changes_html(). ?></li>
 				<?php endforeach; ?>
 			</ul>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return window.confirm(<?php echo esc_attr( wp_json_encode( $confirm ) ); ?>);">
