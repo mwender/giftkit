@@ -523,7 +523,7 @@ class Admin_Page {
 								<?php
 								$confirm = sprintf(
 									/* translators: 1: form title, 2: list of changes, one per line */
-									__( "Update \"%1\$s\"? This changes:\n\n%2\$s\n\nChanges made to these parts in the form editor will be replaced.", 'giftkit' ),
+									__( "Update \"%1\$s\"? GiftKit will:\n\n%2\$s\n\nChanges made to these parts in the form editor will be replaced.", 'giftkit' ),
 									$form['title'],
 									'• ' . implode( "\n• ", $changes )
 								);
