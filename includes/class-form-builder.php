@@ -445,10 +445,34 @@ class Form_Builder {
 	 * @param array $settings GiftKit settings, including the feed IDs.
 	 */
 	public static function sync_feeds( $form, $settings ) {
+		foreach ( self::feed_changes( $form, $settings ) as $feed_id => $change ) {
+			// GFAPI::update_feed() only finds active feeds, so activate the
+			// feed before writing its meta, then set the state it should have.
+			GFAPI::update_feed_property( $feed_id, 'is_active', 1 );
+			$result = GFAPI::update_feed( $feed_id, $change['meta'], $form['id'] );
+			GFAPI::update_feed_property( $feed_id, 'is_active', $change['active'] ? 1 : 0 );
+
+			if ( is_wp_error( $result ) ) {
+				gf_stripe()->log_error( __METHOD__ . "(): GiftKit couldn't update feed {$feed_id}: " . $result->get_error_message() );
+			}
+		}
+	}
+
+	/**
+	 * The feeds that differ from what the settings call for, with the meta
+	 * and state each should have.
+	 *
+	 * @param array $form     The form.
+	 * @param array $settings GiftKit settings, including the feed IDs.
+	 *
+	 * @return array Keyed by feed ID: `name`, `meta` and `active`.
+	 */
+	private static function feed_changes( $form, $settings ) {
 		if ( ! function_exists( 'gf_stripe' ) ) {
-			return;
+			return array();
 		}
 
+		$changes = array();
 		foreach ( self::feed_definitions( $form, $settings ) as $key => $definition ) {
 			$feed_id = (int) rgar( $settings, $key );
 			$feed    = $feed_id ? GFAPI::get_feed( $feed_id ) : null;
@@ -456,23 +480,120 @@ class Form_Builder {
 				continue;
 			}
 
-			$meta = $feed['meta'];
+			$meta    = $feed['meta'];
+			$changed = (bool) $feed['is_active'] !== $definition['active'];
 			foreach ( array( 'subscription_name', 'feed_condition_conditional_logic', 'feed_condition_conditional_logic_object' ) as $setting ) {
 				if ( isset( $definition['meta'][ $setting ] ) ) {
+					// Loose: stored values can come back as strings.
+					$changed          = $changed || rgar( $meta, $setting ) != $definition['meta'][ $setting ]; // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
 					$meta[ $setting ] = $definition['meta'][ $setting ];
 				}
 			}
 
-			// GFAPI::update_feed() only finds active feeds, so activate the
-			// feed before writing its meta, then set the state it should have.
-			GFAPI::update_feed_property( $feed_id, 'is_active', 1 );
-			$result = GFAPI::update_feed( $feed_id, $meta, $form['id'] );
-			GFAPI::update_feed_property( $feed_id, 'is_active', $definition['active'] ? 1 : 0 );
-
-			if ( is_wp_error( $result ) && function_exists( 'gf_stripe' ) ) {
-				gf_stripe()->log_error( __METHOD__ . "(): GiftKit couldn't update feed {$feed_id}: " . $result->get_error_message() );
+			if ( $changed ) {
+				$changes[ $feed_id ] = array(
+					'name'   => rgar( $feed['meta'], 'feedName' ),
+					'meta'   => $meta,
+					'active' => $definition['active'],
+				);
 			}
 		}
+
+		return $changes;
+	}
+
+	/**
+	 * Applies the settings to a form and its feeds, and saves the form.
+	 *
+	 * @param array $form     The form.
+	 * @param array $settings GiftKit settings, including the feed IDs.
+	 *
+	 * @return bool Whether the form was saved.
+	 */
+	public static function update( $form, $settings ) {
+		$form   = self::apply_settings( $form, $settings );
+		$result = GFAPI::update_form( $form );
+		self::sync_feeds( $form, $settings );
+
+		return ! is_wp_error( $result );
+	}
+
+	/**
+	 * What applying the settings would change on a form and its feeds,
+	 * without changing anything.
+	 *
+	 * Saving the Donation tab rewrites the fields, email, confirmation and
+	 * feed settings GiftKit manages. They differ from what a save would
+	 * write when the form predates a GiftKit update, or when one of them was
+	 * edited by hand.
+	 *
+	 * @param array $form     The form.
+	 * @param array $settings GiftKit settings, including the feed IDs.
+	 *
+	 * @return string[] What would change, one name each.
+	 */
+	public static function pending_changes( $form, $settings ) {
+		// apply_settings() changes field objects in place, so give it copies.
+		$copy           = $form;
+		$copy['fields'] = array_map(
+			function ( $field ) {
+				return clone $field;
+			},
+			rgar( $form, 'fields' ) ?: array()
+		);
+		$updated = self::apply_settings( $copy, $settings );
+
+		$changes = array();
+		$before  = self::field_data( $form );
+		$after   = self::field_data( $updated );
+		foreach ( $after as $id => $data ) {
+			// Loose: Gravity Forms stores some numbers as strings.
+			if ( ! isset( $before[ $id ] ) || $before[ $id ] != $data ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+				/* translators: %s: field label */
+				$changes[] = sprintf( __( 'Field: %s', 'giftkit' ), $data['label'] );
+			}
+		}
+		if ( array_keys( $before ) !== array_keys( $after ) ) {
+			$changes[] = __( 'Field order', 'giftkit' );
+		}
+
+		foreach ( array( 'notifications', 'confirmations' ) as $key ) {
+			$was = rgar( $form, $key ) ?: array();
+			foreach ( ( rgar( $updated, $key ) ?: array() ) as $id => $item ) {
+				if ( ! isset( $was[ $id ] ) ) {
+					/* translators: %s: notification name */
+					$changes[] = sprintf( __( 'Email: %s (added)', 'giftkit' ), rgar( $item, 'name' ) );
+				} elseif ( $was[ $id ] != $item ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+					$changes[] = 'notifications' === $key
+						/* translators: %s: notification name */
+						? sprintf( __( 'Email: %s', 'giftkit' ), rgar( $item, 'name' ) )
+						: __( 'Thank-you message', 'giftkit' );
+				}
+			}
+		}
+
+		foreach ( self::feed_changes( $updated, $settings ) as $change ) {
+			/* translators: %s: Stripe feed name */
+			$changes[] = sprintf( __( 'Stripe feed: %s', 'giftkit' ), $change['name'] );
+		}
+
+		return $changes;
+	}
+
+	/**
+	 * Each field's properties as plain arrays, keyed by field ID in form order.
+	 *
+	 * @param array $form The form.
+	 *
+	 * @return array
+	 */
+	private static function field_data( $form ) {
+		$data = array();
+		foreach ( ( rgar( $form, 'fields' ) ?: array() ) as $field ) {
+			$data[ (int) $field->id ] = json_decode( wp_json_encode( $field ), true );
+		}
+
+		return $data;
 	}
 
 	/**

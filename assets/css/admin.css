@@ -244,3 +244,16 @@
 	min-width: 0;
 	font-family: Consolas, Monaco, monospace;
 }
+
+/* A form's Donation tab, when saving would change the form. */
+.gform-settings-panel.giftkit-updates {
+	border-left: 4px solid #dba617;
+}
+
+.giftkit-updates ul.giftkit-changes {
+	margin: 0 0 1em 1.5em;
+}
+
+.giftkit-updates ul.giftkit-changes li {
+	list-style: disc;
+}
