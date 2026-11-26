@@ -40,6 +40,11 @@ class Addon extends GFAddOn {
 	const DOCS_URL = 'https://giftkit.org/docs/';
 
 	/**
+	 * The admin-post action that updates every form with changes waiting.
+	 */
+	const UPDATE_ACTION = 'giftkit_update_forms';
+
+	/**
 	 * @var Addon|null
 	 */
 	private static $_instance = null;
@@ -100,6 +105,8 @@ class Addon extends GFAddOn {
 		add_filter( 'gform_addon_navigation', array( $this, 'add_menu_item' ) );
 		add_action( 'admin_post_' . Admin_Page::SLUG, array( Admin_Page::class, 'handle_create' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_forms_list_button' ) );
+		add_action( 'admin_notices', array( $this, 'forms_list_notice' ) );
+		add_action( 'admin_post_' . self::UPDATE_ACTION, array( $this, 'handle_update_forms' ) );
 	}
 
 	/*
@@ -587,14 +594,173 @@ class Addon extends GFAddOn {
 			return false;
 		}
 
-		$form     = GFAPI::get_form( $form['id'] );
-		$settings = $form['giftkit'];
-		$form     = Form_Builder::apply_settings( $form, $settings );
+		$form = GFAPI::get_form( $form['id'] );
 
-		$result = GFAPI::update_form( $form );
-		Form_Builder::sync_feeds( $form, $settings );
+		return Form_Builder::update( $form, $form['giftkit'] );
+	}
 
-		return ! is_wp_error( $result );
+	/**
+	 * What saving a form's Donation tab would change, from the form as
+	 * stored now.
+	 *
+	 * @param int $form_id Form ID.
+	 *
+	 * @return string[]
+	 */
+	public function pending_changes( $form_id ) {
+		$form = GFAPI::get_form( $form_id );
+		if ( ! Form_Builder::is_giftkit_form( $form ) ) {
+			return array();
+		}
+
+		return Form_Builder::pending_changes( $form, $this->get_form_settings( $form ) );
+	}
+
+	/**
+	 * The list of changes, and what GiftKit does and doesn't touch.
+	 *
+	 * @param string[] $changes What would change.
+	 *
+	 * @return string HTML.
+	 */
+	private static function changes_html( $changes ) {
+		$items = '';
+		foreach ( $changes as $change ) {
+			$items .= '<li>' . esc_html( $change ) . '</li>';
+		}
+
+		return '<ul class="giftkit-changes">' . $items . '</ul>';
+	}
+
+	/**
+	 * The notice at the top of the Donation tab when saving would change the
+	 * form, worked out as the page is drawn so it reflects a save just made.
+	 *
+	 * @param int $form_id Form ID.
+	 *
+	 * @return array A settings section.
+	 */
+	private function updates_section( $form_id ) {
+		return array(
+			'title'      => esc_html__( 'Saving will update this form', 'giftkit' ),
+			'class'      => 'giftkit-updates',
+			'dependency' => function () use ( $form_id ) {
+				return (bool) $this->pending_changes( $form_id );
+			},
+			'fields'     => array(
+				array(
+					'name' => 'giftkitUpdates',
+					'type' => 'html',
+					'html' => function () use ( $form_id ) {
+						return '<p>' . esc_html__( 'GiftKit manages the parts of this form listed below, and they differ from what it would set up now. That happens after a GiftKit update, or when one of them was changed by hand. Save Settings brings them up to date:', 'giftkit' ) . '</p>'
+							. self::changes_html( $this->pending_changes( $form_id ) )
+							. '<p>' . esc_html__( 'Changes made to these parts in the form editor will be replaced. Fields you\'ve added yourself are never touched.', 'giftkit' ) . '</p>';
+					},
+				),
+			),
+		);
+	}
+
+	/*
+	 * Updating forms from the forms list
+	 */
+
+	/**
+	 * GiftKit forms with changes waiting.
+	 *
+	 * @return array Form title and changes, keyed by form ID.
+	 */
+	private function forms_with_changes() {
+		$forms = array();
+		foreach ( GFAPI::get_forms( null ) as $form ) {
+			if ( ! Form_Builder::is_giftkit_form( $form ) ) {
+				continue;
+			}
+			$changes = Form_Builder::pending_changes( $form, $this->get_form_settings( $form ) );
+			if ( $changes ) {
+				$forms[ (int) $form['id'] ] = array(
+					'title'   => $form['title'],
+					'changes' => $changes,
+				);
+			}
+		}
+
+		return $forms;
+	}
+
+	/**
+	 * On the forms list, lists the GiftKit forms with changes waiting, with
+	 * a button that updates them all.
+	 *
+	 * Gravity Forms hides notices on its pages unless they have the
+	 * `gf-notice` class.
+	 */
+	public function forms_list_notice() {
+		if ( 'gf_edit_forms' !== rgget( 'page' ) || rgget( 'id' ) || ! GFCommon::current_user_can_any( 'gravityforms_edit_forms' ) ) {
+			return;
+		}
+
+		$updated = absint( rgget( 'giftkit_updated' ) );
+		if ( $updated ) {
+			printf(
+				'<div class="notice notice-success is-dismissible gf-notice"><p>%s</p></div>',
+				/* translators: %d: number of forms */
+				esc_html( sprintf( _n( 'GiftKit updated %d donation form.', 'GiftKit updated %d donation forms.', $updated, 'giftkit' ), $updated ) )
+			);
+		}
+
+		$forms = $this->forms_with_changes();
+		if ( ! $forms ) {
+			return;
+		}
+
+		$count   = count( $forms );
+		$confirm = __( 'Update these forms? Changes made in the form editor to the parts listed will be replaced.', 'giftkit' );
+		?>
+		<div class="notice notice-warning gf-notice giftkit-forms-notice">
+			<p>
+				<strong>
+					<?php
+					/* translators: %d: number of forms */
+					echo esc_html( sprintf( _n( '%d donation form has updates waiting.', '%d donation forms have updates waiting.', $count, 'giftkit' ), $count ) );
+					?>
+				</strong>
+				<?php esc_html_e( 'The parts of these forms that GiftKit manages differ from what it would set up now, after a GiftKit update or a change made by hand. Update them all here, or save each form\'s Donation tab.', 'giftkit' ); ?>
+			</p>
+			<ul style="list-style:disc;margin-left:2em;">
+				<?php foreach ( $forms as $form_id => $form ) : ?>
+					<li><a href="<?php echo esc_url( self::settings_url( $form_id ) ); ?>"><?php echo esc_html( $form['title'] ); ?></a>: <?php echo esc_html( implode( '; ', $form['changes'] ) ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return window.confirm(<?php echo esc_attr( wp_json_encode( $confirm ) ); ?>);">
+				<input type="hidden" name="action" value="<?php echo esc_attr( self::UPDATE_ACTION ); ?>">
+				<?php wp_nonce_field( self::UPDATE_ACTION ); ?>
+				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Update all', 'giftkit' ); ?></button></p>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Updates every GiftKit form with changes waiting, as saving each
+	 * form's Donation tab would.
+	 */
+	public function handle_update_forms() {
+		if ( ! GFCommon::current_user_can_any( 'gravityforms_edit_forms' ) ) {
+			wp_die( esc_html__( 'You are not allowed to edit forms.', 'giftkit' ), 403 );
+		}
+		check_admin_referer( self::UPDATE_ACTION );
+
+		$updated = 0;
+		foreach ( array_keys( $this->forms_with_changes() ) as $form_id ) {
+			$form = GFAPI::get_form( $form_id );
+			if ( Form_Builder::update( $form, $this->get_form_settings( $form ) ) ) {
+				++$updated;
+			}
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'gf_edit_forms', 'giftkit_updated' => $updated ), admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	/**
@@ -788,7 +954,7 @@ class Addon extends GFAddOn {
 			),
 		);
 
-		return array( $embed, $gift, $fee, $appearance, $thanks, $credit );
+		return array( $this->updates_section( $form['id'] ), $embed, $gift, $fee, $appearance, $thanks, $credit );
 	}
 
 	/**

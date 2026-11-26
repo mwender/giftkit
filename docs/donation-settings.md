@@ -46,7 +46,7 @@ Donors may also get Stripe's own payment receipt, depending on your Stripe email
 
 If your organization gives donors a written acknowledgement for tax purposes, add the wording you need to the email, for example a line saying whether any goods or services were provided in exchange for the gift. What's required depends on your country and your organization, so GiftKit doesn't add it for you.
 
-Forms created before GiftKit added this email don't have it yet: open the Donation tab, leave this on, and click **Save Settings**.
+Forms created before GiftKit added this email don't have it yet. Saving the Donation tab adds it while this is on (see [When GiftKit updates a form](#when-giftkit-updates-a-form)).
 
 ## Credit
 
@@ -56,4 +56,17 @@ Forms created before GiftKit added this email don't have it yet: open the Donati
 
 A GiftKit form is an ordinary Gravity Forms form, so you can edit it in the form editor: reword labels, add fields or reorder them. GiftKit finds the fields it manages by their role rather than their position, so the settings on this tab keep working.
 
+Some parts of the form follow the settings on this tab, and GiftKit rewrites them every time you save it: the preset amount buttons, the minimum gift and its error message, the fee checkbox's wording, note and position under the amount, the fee calculation, whether the gift type is shown, the thank-you message, and whether the donor email is on. To change one of those, use this tab rather than the form editor, because a change made in the editor is replaced on the next save. Fields you add yourself, and everything else about the form, are never touched.
+
 The form also has two Stripe feeds, under **Settings → Stripe**: one for one-time gifts and one for monthly gifts. GiftKit keeps the monthly gift name and the conditions that pick a feed by gift type in step with this tab, so there's usually no need to change them.
+
+## When GiftKit updates a form
+
+A GiftKit update can change how it sets up a form, for example by moving a field or adding the donor email. Your existing forms get those changes the next time their Donation tab is saved.
+
+GiftKit tells you when that's needed. It compares each form with what saving would make of it, and when they differ:
+
+- the form's Donation tab opens with **Saving will update this form**, listing what would change, and **Save Settings** applies it;
+- the **Forms** list shows which donation forms have updates waiting, with an **Update all** button that saves each of them the same way.
+
+The list also catches changes made by hand to the parts GiftKit manages (see [Changing the form itself](#changing-the-form-itself)) and to its Stripe feed settings, such as a feed switched off. Updating puts those back, so if you've reworded something on purpose, check the list first and make the change through this tab's settings instead.
