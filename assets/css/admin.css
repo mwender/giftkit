@@ -227,6 +227,28 @@
 	vertical-align: middle;
 }
 
+.giftkit-updated {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 12px;
+}
+
+.giftkit-updated .dashicons {
+	color: #008a20;
+}
+
+.giftkit-forms__setup {
+	white-space: nowrap;
+}
+
+.giftkit-forms__setup form {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+}
+
 .giftkit-forms__actions {
 	text-align: right;
 	white-space: nowrap;

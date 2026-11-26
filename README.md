@@ -116,7 +116,7 @@ Whichever currency Gravity Forms is set to. Amounts and totals use its symbol an
 * New: An optional "Powered by GiftKit" credit below the form. It's off unless you turn it on.
 * Improved: The "cover the fee" checkbox is now on the first page, under the amount, and shows the fee in money as the amount changes. Once it's ticked, the total with the fee appears beneath it.
 * Improved: The gift summary on the second page includes the processing fee.
-* New: When a GiftKit update changes how forms are set up, or a part GiftKit manages was changed by hand, the form's Donation tab says what saving will change, and the Forms list offers "Update all".
+* New: When a GiftKit update changes how forms are set up, or a part GiftKit manages was changed by hand, the form's Donation tab says what saving will change, your donation forms list has an Update button for it, and the Forms list offers "Update all".
 * Improved: "Offer monthly gifts" sits directly above the monthly settings, which now show and hide as it's switched.
 * Fixed: Ticking the fee checkbox on the payment page cleared the card details the donor had typed.
 * Documentation at https://giftkit.org/docs/, linked from the plugin.

@@ -470,6 +470,15 @@ class Admin_Page {
 		}
 
 		self::panel_open( __( 'Your donation forms', 'giftkit' ) );
+
+		$updated = absint( rgget( 'giftkit_updated' ) );
+		if ( $updated ) {
+			printf(
+				'<p class="giftkit-updated" role="status"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> %s</p>',
+				/* translators: %d: number of forms */
+				esc_html( sprintf( _n( 'GiftKit updated %d donation form.', 'GiftKit updated %d donation forms.', $updated, 'giftkit' ), $updated ) )
+			);
+		}
 		?>
 		<table class="widefat striped giftkit-forms">
 			<thead>
@@ -478,6 +487,7 @@ class Admin_Page {
 					<th scope="col"><?php esc_html_e( 'Status', 'giftkit' ); ?></th>
 					<th scope="col"><?php esc_html_e( 'Gifts', 'giftkit' ); ?></th>
 					<th scope="col"><?php esc_html_e( 'Page', 'giftkit' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Setup', 'giftkit' ); ?></th>
 					<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'giftkit' ); ?></span></th>
 				</tr>
 			</thead>
@@ -487,6 +497,7 @@ class Admin_Page {
 					$form_id = absint( $form['id'] );
 					$page_id = absint( rgars( $form, 'giftkit/pageId' ) );
 					$page    = $page_id ? get_post( $page_id ) : null;
+					$changes = Form_Builder::pending_changes( $form, Addon::get_instance()->get_form_settings( $form ) );
 					?>
 					<tr>
 						<td><a href="<?php echo esc_url( Addon::settings_url( $form_id ) ); ?>"><strong><?php echo esc_html( $form['title'] ); ?></strong></a></td>
@@ -506,6 +517,27 @@ class Admin_Page {
 								echo '<span class="giftkit-muted">' . esc_html__( 'None', 'giftkit' ) . '</span>';
 							}
 							?>
+						</td>
+						<td class="giftkit-forms__setup">
+							<?php if ( $changes ) : ?>
+								<?php
+								$confirm = sprintf(
+									/* translators: 1: form title, 2: list of changes, one per line */
+									__( "Update \"%1\$s\"? This changes:\n\n%2\$s\n\nChanges made to these parts in the form editor will be replaced.", 'giftkit' ),
+									$form['title'],
+									'• ' . implode( "\n• ", $changes )
+								);
+								?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return window.confirm(<?php echo esc_attr( wp_json_encode( $confirm ) ); ?>);">
+									<input type="hidden" name="action" value="<?php echo esc_attr( Addon::UPDATE_ACTION ); ?>">
+									<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>">
+									<?php wp_nonce_field( Addon::UPDATE_ACTION ); ?>
+									<button type="submit" class="button button-small"><?php esc_html_e( 'Update', 'giftkit' ); ?></button>
+									<a href="<?php echo esc_url( Addon::settings_url( $form_id ) ); ?>"><?php esc_html_e( 'Review', 'giftkit' ); ?><span class="screen-reader-text"> <?php esc_html_e( 'the changes on the Donation tab', 'giftkit' ); ?></span></a>
+								</form>
+							<?php else : ?>
+								<span class="giftkit-muted"><?php esc_html_e( 'Up to date', 'giftkit' ); ?></span>
+							<?php endif; ?>
 						</td>
 						<td class="giftkit-forms__actions">
 							<a href="<?php echo esc_url( Addon::settings_url( $form_id ) ); ?>"><?php esc_html_e( 'Settings', 'giftkit' ); ?></a> |

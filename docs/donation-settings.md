@@ -67,6 +67,7 @@ A GiftKit update can change how it sets up a form, for example by moving a field
 GiftKit tells you when that's needed. It compares each form with what saving would make of it, and when they differ:
 
 - the form's Donation tab opens with **Saving will update this form**, listing what would change, and **Save Settings** applies it;
+- **Forms → New Donation Form** lists your donation forms with a **Setup** column: "Up to date", or an **Update** button for that form and a **Review** link to its Donation tab;
 - the **Forms** list shows which donation forms have updates waiting, with an **Update all** button that saves each of them the same way.
 
 The list also catches changes made by hand to the parts GiftKit manages (see [Changing the form itself](#changing-the-form-itself)) and to its Stripe feed settings, such as a feed switched off. Updating puts those back, so if you've reworded something on purpose, check the list first and make the change through this tab's settings instead.
