@@ -742,8 +742,9 @@ class Addon extends GFAddOn {
 	}
 
 	/**
-	 * Updates every GiftKit form with changes waiting, as saving each
-	 * form's Donation tab would.
+	 * Updates GiftKit forms with changes waiting, as saving each form's
+	 * Donation tab would: all of them, or the one in `form_id`. Returns to
+	 * the page the request came from.
 	 */
 	public function handle_update_forms() {
 		if ( ! GFCommon::current_user_can_any( 'gravityforms_edit_forms' ) ) {
@@ -751,15 +752,21 @@ class Addon extends GFAddOn {
 		}
 		check_admin_referer( self::UPDATE_ACTION );
 
+		$only    = absint( rgpost( 'form_id' ) );
 		$updated = 0;
 		foreach ( array_keys( $this->forms_with_changes() ) as $form_id ) {
+			if ( $only && $only !== $form_id ) {
+				continue;
+			}
 			$form = GFAPI::get_form( $form_id );
 			if ( Form_Builder::update( $form, $this->get_form_settings( $form ) ) ) {
 				++$updated;
 			}
 		}
 
-		wp_safe_redirect( add_query_arg( array( 'page' => 'gf_edit_forms', 'giftkit_updated' => $updated ), admin_url( 'admin.php' ) ) );
+		$back = wp_get_referer() ?: add_query_arg( 'page', 'gf_edit_forms', admin_url( 'admin.php' ) );
+		$back = remove_query_arg( array( 'giftkit_updated', 'created' ), $back );
+		wp_safe_redirect( add_query_arg( 'giftkit_updated', $updated, $back ) );
 		exit;
 	}
 
