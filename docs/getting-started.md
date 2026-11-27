@@ -12,7 +12,7 @@ This page takes you from installing GiftKit to taking real gifts: connect Stripe
 ## 1. Install and activate the plugins
 
 1. Install and activate Gravity Forms and the Gravity Forms Stripe Add-On.
-2. Install and activate GiftKit.
+2. Install and activate GiftKit: under Plugins → Add New Plugin, search for "GiftKit", or download it from [WordPress.org](https://wordpress.org/plugins/giftkit/).
 
 GiftKit needs the Stripe Add-On: until it's active, GiftKit shows a notice and stays out of the way.
 

@@ -186,12 +186,12 @@ p { margin: 0; }
 
 .button--primary:hover { background: #2c3260; }
 
-/* Not a link: there's nothing to install from WordPress.org yet. */
-.button--soon {
-	border: 2px dashed var(--line);
-	color: var(--slate);
-	background: var(--panel);
+.button--coral {
+	background: var(--coral);
+	color: #fff;
 }
+
+.button--coral:hover { background: #b9302f; }
 
 .code-link {
 	width: 100%;
