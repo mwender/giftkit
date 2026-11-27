@@ -35,7 +35,7 @@ This checkout lives in a dedicated plain-WordPress site, deliberately not Bedroc
 - Gravity Forms and the Gravity Forms Stripe Add-On were copied from the Maker City site's Composer install; they're commercial plugins and aren't in this repo.
 - Stripe runs in test mode, connected under Forms → Settings → Stripe. The site has no public URL, so Stripe can't deliver webhooks to it. One-time test payments work without them; for subscription events, forward webhooks with the Stripe CLI (`stripe listen --forward-to https://giftkit.test/?callback=gravityformsstripe`).
 
-Sibling plugins may join it later under `~/webdev/wordpress-plugins/` (e.g. `localdev-switcher`).
+This site also serves LocalDev Switcher: its release builds are checked here, swapped in for the released copy that switches GiftKit's two copies. Its development happens on its own sibling site; see "LocalDev Switcher is the exception to the layout" in `~/webdev/wordpress-plugins/AGENTS.md`. If you switch GiftKit's copies with WP-CLI rather than the Plugins screen, LocalDev Switcher before 0.8.1 shows the wrong copy as active; click its switch link once to put it right.
 
 ## Packaging and releases
 
